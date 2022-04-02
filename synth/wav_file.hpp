@@ -18,12 +18,13 @@ namespace details {
 /// Writes a FourCC ("four-character code" AKA OSType) to an output iterator.
 ///
 /// \tparam OutputIterator  A type compatible with the requirements of an output
-/// iterator. \param c0  The first of the four characters to be written. \param
-/// c1  The second of the four characters to be written. \param c2  The third of
-/// the four characters to be written. \param c3  The fourth of the four
-/// characters to be written. \param it  The output iterator to which the four
-/// bytes are written. \returns The output iterator \p it after writing the four
-/// bytes.
+///   iterator.
+/// \param c0  The first of the four characters to be written.
+/// \param c1  The second of the four characters to be written.
+/// \param c2  The third of the four characters to be written.
+/// \param c3  The fourth of the four characters to be written.
+/// \param it  The output iterator to which the four bytes are written.
+/// \returns  The output iterator \p it after writing the four bytes.
 template <typename OutputIterator>
 OutputIterator append4cc (char const c0, char const c1, char const c2,
                           char const c3, OutputIterator it) {
@@ -39,7 +40,7 @@ OutputIterator append4cc (char const c0, char const c1, char const c2,
 ///
 /// \tparam Bits The number of bits of output to produce.
 /// \tparam OutputIterator  A type compatible with the requirements of an output
-/// iterator.
+///   iterator.
 template <unsigned Bits, typename OutputIterator>
 struct appender {
   /// \param v  The value to be written.
@@ -84,9 +85,11 @@ struct appender<32, OutputIterator> {
 
 /// \tparam Bits The number of bits of output to produce.
 /// \tparam OutputIterator  A type compatible with the requirements of an output
-/// iterator. \param v  The value to be written. \param it  The beginning of the
-/// destination range. \returns  Output iterator to the element in the
-/// destination range, one past the last value written.
+///   iterator.
+/// \param v  The value to be written.
+/// \param it  The beginning of the destination range.
+/// \returns  Output iterator to the element in the destination range, one past
+///   the last value written.
 template <unsigned Bits, typename OutputIterator>
 inline OutputIterator append (uinteger_t<Bits> const v,
                               OutputIterator const it) {
@@ -94,9 +97,11 @@ inline OutputIterator append (uinteger_t<Bits> const v,
 }
 /// \tparam Bits The number of bits of output to produce.
 /// \tparam OutputIterator  A type compatible with the requirements of an output
-/// iterator. \param v  The value to be written. \param it  The beginning of the
-/// destination range. \returns  Output iterator to the element in the
-/// destination range, one past the last value written.
+///   iterator.
+/// \param v  The value to be written.
+/// \param it  The beginning of the destination range.
+/// \returns  Output iterator to the element in the destination range, one past
+///   the last value written.
 template <unsigned Bits, typename OutputIterator>
 inline OutputIterator append (sinteger_t<Bits> const v,
                               OutputIterator const it) {
@@ -107,9 +112,9 @@ inline OutputIterator append (sinteger_t<Bits> const v,
 /// [-1,+1], to a signed integer in the range [-2^Bits, 2^Bits). The returned
 /// type is a signed integer of at least \p Bits bits.
 ///
-/// \tparam Bits The number of bits in the output value.
+/// \tparam Bits  The number of bits in the output value.
 /// \param x  The value to be scaled.
-/// \returns The scaled equivalent of \p x.
+/// \returns  The scaled equivalent of \p x.
 template <unsigned Bits, typename T = sinteger_t<Bits>>
 inline T to_integral (double const x) {
   assert (std::isfinite (x));
@@ -119,11 +124,13 @@ inline T to_integral (double const x) {
 }
 
 /// \tparam ForwardIterator type compatible with the requirements of a forward
-/// iterator. \param first  The iterator pointing to the first element \param
-/// last   Iterator pointing to the end of the range \param max  The largest
-/// allowed return value. \returns The distance between the \p first and \p last
-/// iterators as an unsigned 32 bit value. If the distance is negative, it is
-/// clamped to zero. The maximum value is clamped to \p max.
+/// iterator.
+/// \param first  The iterator pointing to the first element.
+/// \param last   Iterator pointing to the end of the range.
+/// \param max  The largest allowed return value.
+/// \returns  The distance between the \p first and \p last iterators as an
+///   unsigned 32 bit value. If the distance is negative, it is clamped to zero.
+///   The maximum value is clamped to \p max.
 template <typename ForwardIterator>
 constexpr uint32_t clamped_distance (
     ForwardIterator const first, ForwardIterator const last,
@@ -174,14 +181,15 @@ private:
 }  // end namespace details
 
 /// \tparam ForwardIterator  A type compatible with the requirements of a
-/// forward iterator and
-///   whose value-type is a floating-point type.
+///   forward iterator and whose value-type is a floating-point type.
 /// \tparam OutputIterator  A type compatible with the requirements of an output
-/// iterator. \param first_sample  Iterator pointing to the first sample. \param
-/// last_sample  Iterator pointing to the end of the range of samples. \param
-/// sample_rate  The sample rate in Hertz. \param oit  The beginning of the
-/// destination range. \returns  Output iterator to the element in the
-/// destination range, one past the last element written.
+///   iterator.
+/// \param first_sample  Iterator pointing to the first sample.
+/// \param last_sample  Iterator pointing to the end of the range of samples.
+/// \param sample_rate  The sample rate in Hertz.
+/// \param oit  The beginning of the destination range.
+/// \returns  Output iterator to the element in the destination range, one past
+///   the last element written.
 template <typename ForwardIterator, typename OutputIterator,
           typename = typename std::enable_if_t<std::is_floating_point_v<
               typename std::iterator_traits<ForwardIterator>::value_type>>>
