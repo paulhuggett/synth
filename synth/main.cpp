@@ -122,7 +122,7 @@ private:
 int main () {
   std::vector<double> samples;
 
-  if constexpr ((false)) {
+  if constexpr (/* DISABLES CODE */ (false)) {
     dump_wavetable (sine);
   }
 
@@ -136,8 +136,8 @@ int main () {
                      oscillator_double{&osc});
   }
 
-  if constexpr (/* DISABLES CODE */ (true)) {
-    // Play a scale of C major on a single voice
+  if constexpr ((true)) {
+    // Play a scale of C major using a collection of voices.
     voice_assign voices;
     std::array<unsigned, 8> const c_major_scale{{
         c4,        // C4
@@ -189,7 +189,7 @@ int main () {
     }
   }
 
-  if constexpr ((false)) {
+  if constexpr (/* DISABLES CODE */ (false)) {
     static constexpr auto two_seconds = sample_rate * 2U;
     oscillator osc{&sine};
     osc.set_frequency (frequency::fromfp (440.0));
@@ -201,7 +201,7 @@ int main () {
                      oscillator_double{&osc});
   }
 
-  if constexpr ((false)) {
+  if constexpr (/* DISABLES CODE */ (false)) {
     chirp (&samples);
   }
 
