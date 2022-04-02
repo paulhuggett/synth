@@ -82,7 +82,7 @@ public:
   }
 
 private:
-  // Phase accumulation is performed in an M-bit integer register.
+  /// Phase accumulation is performed in an M-bit integer register.
   static inline constexpr auto M = 32U;
   static_assert (M >= wavetable::N);
 
@@ -90,17 +90,17 @@ private:
   uinteger_t<M> increment_ = 0U;
   uinteger_t<M> phase_ = 0U;
 
-  // phase_increment() wants to compute f/(S*r) where S is the sample rate and r
-  // is the number of entries in a wavetable. Everything but f is constant and
-  // we'd like to eliminate the division, so rearrange to get f*(r/S).
+  /// phase_increment() wants to compute f/(S*r) where S is the sample rate and
+  /// r is the number of entries in a wavetable. Everything but f is constant
+  /// and we'd like to eliminate the division, so rearrange to get f*(r/S).
   static inline constexpr auto C =
       ufixed<0, M - frequency::fractional_bits - wavetable::N>::fromfp (
           static_cast<double> (1U << wavetable::N) / sample_rate);
 
-  // When multiplying a UQa.b number by a UQc.d number, the result is
-  // UQ(a+c).(b+d). For the phase accumulator, a+c should be at least
-  // wavetable::N but may be more (we don't care if it overflows); b+d should be
-  // as large as possible to maintain precision.
+  /// When multiplying a UQa.b number by a UQc.d number, the result is
+  /// UQ(a+c).(b+d). For the phase accumulator, a+c should be at least
+  /// wavetable::N but may be more (we don't care if it overflows); b+d should
+  /// be as large as possible to maintain precision.
   static inline constexpr auto accumulator_fractional_bits =
       frequency::fractional_bits + decltype (C)::fractional_bits;
 
@@ -114,14 +114,15 @@ private:
   }
 
   /// Returns the phase accumulator control value to be used to obtain frequency
-  /// \p f. \param f  The frequency to be used expressed as a fixed-point number
+  ///   \p f.
+  /// \param f  The frequency to be used expressed as a fixed-point number.
   static constexpr uinteger_t<M> phase_increment (frequency const f) {
-    auto const r =
-        ufixed<M - accumulator_fractional_bits, accumulator_fractional_bits>{
-            f.get () * C.get ()};
-    static_assert (decltype (r)::total_bits == M);
-    static_assert (decltype (r)::integral_bits == wavetable::N);
-    return r.get ();
+    using incr_type =
+        ufixed<M - accumulator_fractional_bits, accumulator_fractional_bits>;
+    static_assert (incr_type::total_bits == M);
+    static_assert (incr_type::integral_bits == wavetable::N);
+
+    return incr_type{f.get () * C.get ()}.get ();
   }
 };
 
