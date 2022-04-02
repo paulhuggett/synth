@@ -41,9 +41,10 @@ public:
                                  uinteger_t<fractional_bits> const fractional) {
     assert ((integral & ~mask_v<integral_bits>) == 0U);
     assert ((fractional & ~mask_v<fractional_bits>) == 0U);
-    return fixed{static_cast<value_type> (
-        ((integral & mask_v<integral_bits>) << fractional_bits) |
-        (fractional & mask_v<fractional_bits>))};
+    return fixed{
+        static_cast<value_type> (
+            (integral & mask_v<integral_bits>) << fractional_bits) |
+        static_cast<value_type> (fractional & mask_v<fractional_bits>)};
   }
 
   constexpr bool operator== (fixed other) const { return x_ == other.x_; }
