@@ -1,0 +1,47 @@
+project (synth CXX)
+cmake_minimum_required (VERSION 3.10)
+
+option (WERROR "Errors as warnings" Off)
+
+function (setup_target target)
+  set (clang_options
+    -Weverything
+    -Wno-c99-extensions
+    -Wno-c++98-compat
+    -Wno-c++98-compat-pedantic
+    -Wno-c++14-extensions
+    -Wno-disabled-macro-expansion
+    -Wno-exit-time-destructors
+    -Wno-global-constructors
+    -Wno-padded
+    -Wno-weak-vtables
+    -Wno-nullability-extension
+  )
+  set (gcc_options
+    -Wall
+    -Wextra
+    -pedantic
+  )
+  set (msvc_options
+    -W4
+    -wd4324 # 4324: structure was padded due to alignment specifier
+  )
+
+  if (WERROR)
+      list (APPEND clang_options -Werror)
+      list (APPEND gcc_options -Werror)
+      list (APPEND msvc_options /WX)
+  endif ()
+
+  set_target_properties (${target} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED Yes)
+
+  target_compile_options (${target} PRIVATE
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${clang_options}>
+    $<$<CXX_COMPILER_ID:GNU>:${gcc_options}>
+    $<$<CXX_COMPILER_ID:MSVC>:${msvc_options}>
+  )
+endfunction (setup_target)
+
+add_subdirectory (cordic_sine)
+add_subdirectory (gentable)
+add_subdirectory (synth)
