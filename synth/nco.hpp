@@ -113,9 +113,11 @@ private:
     return result;
   }
 
-  /// Returns the phase accumulator control value to be used to obtain frequency
-  ///   \p f.
+  /// Computes the phase accumulator control value for frequency \p f.
+  ///
   /// \param f  The frequency to be used expressed as a fixed-point number.
+  /// \return The phase accumulator control value to be used to obtain
+  ///   frequency \p f.
   static constexpr uinteger_t<M> phase_increment (frequency const f) {
     using incr_type =
         ufixed<M - accumulator_fractional_bits, accumulator_fractional_bits>;
