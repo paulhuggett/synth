@@ -135,7 +135,7 @@ double check () {
 // Print out sin(x) vs fp CORDIC sin(x)
 int main () {
   check_ctab (cordic_ctab);
-  double const max_difference = check ();
+  check ();
 
   // Adjust the angle so that it lies within the range supported by the CORDIC
   // algorithm
