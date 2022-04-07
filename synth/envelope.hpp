@@ -14,6 +14,7 @@ public:
   static constexpr double decay_time = 0.05;
   static constexpr double sustain = 0.5;
   static constexpr double release_time = 0.2;
+  using amplitude = wavetable::amplitude;
 
   void note_on () { phase_ = phase::attack; }
   void note_off () {

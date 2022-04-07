@@ -23,9 +23,10 @@ inline double midi_note_to_frequency (unsigned const note) {
 
 class voice {
 public:
+  using amplitude = wavetable::amplitude;
   using frequency = oscillator::frequency;
 
-  explicit constexpr voice (wavetable const* const __nonnull w)
+  explicit constexpr voice (wavetable const* const NONNULL w)
       : osc_{{oscillator{w}, oscillator{w}}} {}
 
   void note_on (unsigned const note) {
@@ -37,12 +38,11 @@ public:
   void note_off () { env_.note_off (); }
 
   amplitude tick () {
-    return env_.tick (amplitude::fromfp (
-        std::accumulate (std::begin (osc_), std::end (osc_), 0.0,
-                         [] (double acc, oscillator& osc) {
-                           return acc + osc.tick ().as_double ();
-                         }) /
-        osc_.size ()));
+    double const a = std::accumulate (std::begin (osc_), std::end (osc_), 0.0,
+                                      [] (double const acc, oscillator& osc) {
+                                        return acc + osc.tick ().as_double ();
+                                      });
+    return env_.tick (amplitude::fromfp (a));
   }
 
 private:

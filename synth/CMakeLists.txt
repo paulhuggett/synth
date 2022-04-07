@@ -6,5 +6,6 @@ add_executable (synth
   uint.hpp
   voice.hpp
   wav_file.hpp
+  wavetable.hpp
 )
 setup_target (synth)

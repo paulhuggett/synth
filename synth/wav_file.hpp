@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <concepts>
 #include <cstdint>
 #include <iterator>
 #include <type_traits>
