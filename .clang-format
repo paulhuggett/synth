@@ -1,6 +1,5 @@
 
 ---
-Language     : Cpp
 BasedOnStyle : Google
 
 AccessModifierOffset    : -2

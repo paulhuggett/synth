@@ -2,6 +2,7 @@ project (synth CXX)
 cmake_minimum_required (VERSION 3.10)
 
 option (WERROR "Errors as warnings" Off)
+set (CMAKE_CXX_STANDARD 17 CACHE STRING "C++ Standard Version")
 
 function (setup_target target)
   set (clang_options
@@ -33,8 +34,6 @@ function (setup_target target)
       list (APPEND msvc_options /WX)
   endif ()
 
-  set_target_properties (${target} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED Yes)
-
   target_compile_options (${target} PRIVATE
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${clang_options}>
     $<$<CXX_COMPILER_ID:GNU>:${gcc_options}>
@@ -42,6 +41,8 @@ function (setup_target target)
   )
 endfunction (setup_target)
 
+add_subdirectory (systemc)
 add_subdirectory (cordic_sine)
 add_subdirectory (gentable)
 add_subdirectory (synth)
+add_subdirectory (scsynth)

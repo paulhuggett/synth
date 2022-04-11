@@ -2,6 +2,8 @@
 #ifndef SYNTH_FIXED_HPP
 #define SYNTH_FIXED_HPP
 
+#include <ostream>
+
 #include "uint.hpp"
 
 namespace synth {

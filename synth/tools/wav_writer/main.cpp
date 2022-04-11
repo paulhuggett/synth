@@ -1,12 +1,16 @@
 // -*- mode: c++; coding: utf-8-unix; -*-
+// Standard library includes
 #include <fstream>
 #include <iostream>
 #include <numeric>
 #include <vector>
 
-#include "envelope.hpp"
-#include "nco.hpp"
-#include "voice.hpp"
+// synth library includes
+#include "synth/envelope.hpp"
+#include "synth/nco.hpp"
+#include "synth/voice.hpp"
+
+// Local includes
 #include "wav_file.hpp"
 
 using namespace synth;

@@ -20,7 +20,7 @@ constexpr inline double half_pi = M_PI_2;
 #else
 constexpr inline double half_pi = pi / 2.0;
 #endif
-constexpr inline double two_pi = 2.0 * M_PI;
+constexpr inline double two_pi = 2.0 * pi;
 
 class wavetable {
 public:

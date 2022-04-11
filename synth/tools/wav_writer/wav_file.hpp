@@ -8,8 +8,6 @@
 #include <iterator>
 #include <type_traits>
 
-#include "uint.hpp"
-
 namespace synth {
 
 namespace details {
