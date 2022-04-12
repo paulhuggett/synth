@@ -709,44 +709,42 @@
                         <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="R5q-Za-1eH">
-                                <rect key="frame" x="18" y="206" width="69" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="R5q-Za-1eH">
+                                <rect key="frame" x="71" y="206" width="69" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Waveform:" id="c7C-sE-2Ph">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="U9A-oU-074">
-                                <rect key="frame" x="100" y="150" width="255" height="28"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="U9A-oU-074">
+                                <rect key="frame" x="147" y="150" width="261" height="28"/>
                                 <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="20" maxValue="10000" doubleValue="440" tickMarkPosition="above" numberOfTickMarks="10" sliderType="linear" id="4vX-gh-f5L"/>
                                 <connections>
                                     <action selector="frequencyAction:" target="XfG-lQ-9wD" id="dUL-b8-vhy"/>
                                 </connections>
                             </slider>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MC7-VY-8gw">
-                                <rect key="frame" x="18" y="160" width="78" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MC7-VY-8gw">
+                                <rect key="frame" x="71" y="160" width="72" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Frequency:" id="hWL-wD-uvd">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4J8-W0-E4b">
-                                <rect key="frame" x="100" y="132" width="255" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <textField horizontalHuggingPriority="249" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4J8-W0-E4b">
+                                <rect key="frame" x="147" y="132" width="261" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Live frequency (Hz)" id="Ocg-jj-ymX">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="z5F-la-1Z1">
-                                <rect key="frame" x="99" y="199" width="97" height="25"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="z5F-la-1Z1">
+                                <rect key="frame" x="146" y="199" width="133" height="25"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="120" id="smz-2u-dJu"/>
+                                </constraints>
                                 <popUpButtonCell key="cell" type="push" title="Sine" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="O3H-eq-ubY" id="Dbo-UI-4Vv">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
@@ -766,6 +764,22 @@
                                 </connections>
                             </popUpButton>
                         </subviews>
+                        <constraints>
+                            <constraint firstItem="4J8-W0-E4b" firstAttribute="leading" secondItem="U9A-oU-074" secondAttribute="leading" id="4Gm-ai-eNQ"/>
+                            <constraint firstItem="R5q-Za-1eH" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="73" id="9OY-bG-cJC"/>
+                            <constraint firstItem="MC7-VY-8gw" firstAttribute="top" secondItem="U9A-oU-074" secondAttribute="top" id="GX4-0n-CwO"/>
+                            <constraint firstItem="4J8-W0-E4b" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="z5F-la-1Z1" secondAttribute="leading" id="N8M-Fx-9vu"/>
+                            <constraint firstItem="4J8-W0-E4b" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="122" id="RGI-GT-kzN"/>
+                            <constraint firstItem="U9A-oU-074" firstAttribute="leading" secondItem="MC7-VY-8gw" secondAttribute="trailing" constant="8" symbolic="YES" id="Roo-UL-Phy"/>
+                            <constraint firstItem="z5F-la-1Z1" firstAttribute="baseline" secondItem="R5q-Za-1eH" secondAttribute="baseline" id="V20-9M-hXt"/>
+                            <constraint firstItem="MC7-VY-8gw" firstAttribute="leading" secondItem="R5q-Za-1eH" secondAttribute="leading" id="Xin-JS-jel"/>
+                            <constraint firstAttribute="trailing" secondItem="4J8-W0-E4b" secondAttribute="trailing" constant="74" id="amQ-du-OaJ"/>
+                            <constraint firstAttribute="trailing" secondItem="z5F-la-1Z1" secondAttribute="trailing" constant="205" id="cMw-IY-MaO"/>
+                            <constraint firstItem="z5F-la-1Z1" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="R5q-Za-1eH" secondAttribute="trailing" constant="8" symbolic="YES" id="eAY-eG-iO2"/>
+                            <constraint firstItem="4J8-W0-E4b" firstAttribute="trailing" secondItem="U9A-oU-074" secondAttribute="trailing" id="mRC-xG-x2L"/>
+                            <constraint firstItem="4J8-W0-E4b" firstAttribute="top" secondItem="U9A-oU-074" secondAttribute="bottom" constant="8" symbolic="YES" id="o1T-4H-Uqs"/>
+                            <constraint firstItem="U9A-oU-074" firstAttribute="top" secondItem="z5F-la-1Z1" secondAttribute="bottom" constant="27" id="zga-0v-i1o"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="frequencyLabel" destination="4J8-W0-E4b" id="5Dn-J6-MPg"/>
