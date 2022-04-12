@@ -50,9 +50,8 @@ static AudioQueueBufferRef *allocateBuffers (AudioQueueRef queue) {
   Boolean running_;
   AudioQueueRef queue_;
   AudioQueueBufferRef *buffers_;
-  NSRecursiveLock *lock_;
+  NSLock *lock_;
 }
-
 @end
 
 @implementation AppDelegate
@@ -100,43 +99,61 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
   if (self) {
     queue_ = createAudioQueue (&callback, self);
     buffers_ = allocateBuffers (queue_);
-    lock_ = [NSRecursiveLock new];
+    lock_ = [NSLock new];
     running_ = NO;
     // ...
   }
   return self;
 }
 
+static void showError (OSStatus const erc) {
+  [[NSAlert alertWithError:[NSError errorWithDomain:NSOSStatusErrorDomain code:erc
+                                           userInfo:nil]] runModal];
+}
+
+static constexpr inline double sine (double const theta) { return std::sin (theta); }
+static constexpr inline double square (double const theta) {
+  return theta <= synth::pi ? 1.0 : -1.0;
+}
+static constexpr inline double triangle (double const theta) {
+  return (theta <= synth::pi ? theta : (synth::two_pi - theta)) / synth::half_pi - 1.0;
+}
+
 // application did finish launching
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-  if ([lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
-    sine_.reset (new synth::wavetable ([] (double const theta) { return std::sin (theta); }));
-    square_.reset (
-        new synth::wavetable{[] (double const theta) { return theta <= synth::pi ? 1.0 : -1.0; }});
-    triangle_.reset (new synth::wavetable{[] (double const theta) {
-      return (theta <= synth::pi ? theta : (synth::two_pi - theta)) / synth::half_pi - 1.0;
-    }});
-
-    osc_.reset (new synth::oscillator (sine_.get ()));
-    osc_->set_frequency (synth::oscillator::frequency::fromfp (440.0));
-
-    running_ = YES;
-
-    // prime the buffers
-    for (unsigned ctr = 0U; ctr < numBuffers; ++ctr) {
-      [self enqueueAudioBuffer:buffers_[ctr]];
-    }
-
-    UInt32 framesPrepared = 0;
-    OSStatus erc = ::AudioQueuePrime (queue_, framesPrepared, &framesPrepared);
-    NSLog (@"AudioQueuePrime returned %d", static_cast<int> (erc));
-    erc = ::AudioQueueStart (queue_, nullptr /* start time */);
-    NSLog (@"AudioQueueStart returned %d", static_cast<int> (erc));
-
-    [lock_ unlock];
-  } else {
+  if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     NSLog (@"applicationDidFinishLaunching could not obtain the lock in a reasonable time!");
+  }
+
+  sine_.reset (new synth::wavetable{sine});
+  square_.reset (new synth::wavetable{square});
+  triangle_.reset (new synth::wavetable{triangle});
+
+  osc_.reset (new synth::oscillator (sine_.get ()));
+  osc_->set_frequency (synth::oscillator::frequency::fromfp (440.0));
+
+  running_ = YES;
+  [lock_ unlock];
+
+  // prime the buffers
+  for (unsigned ctr = 0U; ctr < numBuffers; ++ctr) {
+    [self enqueueAudioBuffer:buffers_[ctr]];
+  }
+
+  UInt32 framesPrepared = 0;
+  if (OSStatus const erc = ::AudioQueuePrime (queue_, framesPrepared, &framesPrepared)) {
+    NSLog (@"AudioQueuePrime returned %d", static_cast<int> (erc));
+    showError (erc);
+    [[NSApplication sharedApplication] terminate:self];
+    return;
+  }
+
+  if (OSStatus const erc = ::AudioQueueStart (queue_, nullptr /* start time */)) {
+    NSLog (@"AudioQueueStart returned %d", static_cast<int> (erc));
+    showError (erc);
+    [[NSApplication sharedApplication] terminate:self];
+    return;
   }
 }
 
@@ -167,38 +184,46 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
 // set waveform
 // ~~~~~~~~~~~~
 - (void)setWaveform:(NSInteger)tag {
-  //  [(YourAppDelegate *)[[NSApplication sharedApplication] delegate] uploadFiles:array]
-  NSLog (@"setting waveform for tag %ld", tag);
   synth::wavetable *w = nullptr;
+  NSString *name = @"";
   switch (tag) {
     case 0:
+      name = @"sine";
       w = sine_.get ();
       break;
     case 1:
+      name = @"square";
       w = square_.get ();
       break;
     case 2:
+      name = @"triangle";
       w = triangle_.get ();
       break;
   }
-  if (w != nullptr) {
-    if ([lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
-      osc_->set_wavetable (w);
-      [lock_ unlock];
-    } else {
-      NSLog (@"setWaveform could not obtain the lock in a reasonable time!");
-    }
+  if (w == nullptr) {
+    NSLog (@"setWaveform didn't understand waveform tag %ld", tag);
+    return;
   }
+
+  if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
+    NSLog (@"setWaveform could not obtain the lock in a reasonable time!");
+    return;
+  }
+  NSLog (@"setting waveform to %@", name);
+  osc_->set_wavetable (w);
+  [lock_ unlock];
 }
 
+// set frequency
+// ~~~~~~~~~~~~~
 - (void)setFrequency:(double)f {
-  NSLog (@"setFrequency %lf", f);
-  if ([lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
-    osc_->set_frequency (synth::oscillator::frequency::fromfp (f));
-    [lock_ unlock];
-  } else {
+  if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     NSLog (@"setFrequency could not obtain the lock in a reasonable time!");
+    return;
   }
+  NSLog (@"setFrequency %lf", f);
+  osc_->set_frequency (synth::oscillator::frequency::fromfp (f));
+  [lock_ unlock];
 }
 
 @end
