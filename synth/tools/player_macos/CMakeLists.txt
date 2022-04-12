@@ -19,6 +19,7 @@ if (APPLE)
 
     RESOURCE "${IMAGES};${STORYBOARDS};${ICONS}"
 
+    XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC Yes
     XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUNDLE_ID}"
     XCODE_ATTRIBUTE_PRODUCT_NAME "player"
   )
@@ -40,5 +41,8 @@ if (APPLE)
     ${AUDIOTOOLBOX_LIBRARY}
     synth
   )
-  target_compile_options (player_macos PRIVATE -Wno-direct-ivar-access)
+  target_compile_options (player_macos PRIVATE
+    -fobjc-arc
+    -Wno-direct-ivar-access
+  )
 endif (APPLE)
