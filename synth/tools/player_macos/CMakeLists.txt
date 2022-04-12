@@ -28,8 +28,8 @@ if (APPLE)
     AppDelegate.mm
     Assets.xcassets
     ViewController.h
-    ViewController.mm
-    player_macos.mm
+    ViewController.m
+    player_macos.m
     ${STORYBOARDS}
   )
   setup_target (player_macos)

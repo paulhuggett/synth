@@ -2,6 +2,8 @@
 
 #import <AudioToolbox/AudioToolbox.h>
 
+#include "synth/nco.hpp"
+
 using SampleType = Float32;
 static constexpr UInt32 buffer_size = 0x1000;
 static constexpr auto numBuffers = 8U;
