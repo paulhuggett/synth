@@ -736,6 +736,14 @@
                                     <action selector="waveformAction:" target="XfG-lQ-9wD" id="FpH-CQ-HiW"/>
                                 </connections>
                             </popUpButton>
+                            <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="U9A-oU-074">
+                                <rect key="frame" x="18" y="150" width="330" height="28"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="20" maxValue="10000" doubleValue="440" tickMarkPosition="above" numberOfTickMarks="10" sliderType="linear" id="4vX-gh-f5L"/>
+                                <connections>
+                                    <action selector="frequencyAction:" target="XfG-lQ-9wD" id="dUL-b8-vhy"/>
+                                </connections>
+                            </slider>
                         </subviews>
                     </view>
                 </viewController>

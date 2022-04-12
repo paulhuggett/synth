@@ -23,4 +23,9 @@
   [d setWaveform:tag];
 }
 
+- (IBAction)frequencyAction:(NSSlider *)sender {
+  AppDelegate *const d = [[NSApplication sharedApplication] delegate];
+  [d setFrequency:sender.doubleValue];
+}
+
 @end

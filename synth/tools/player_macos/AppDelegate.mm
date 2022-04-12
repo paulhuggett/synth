@@ -191,4 +191,14 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
   }
 }
 
+- (void)setFrequency:(double)f {
+  NSLog (@"setFrequency %lf", f);
+  if ([lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
+    osc_->set_frequency (synth::oscillator::frequency::fromfp (f));
+    [lock_ unlock];
+  } else {
+    NSLog (@"setFrequency could not obtain the lock in a reasonable time!");
+  }
+}
+
 @end

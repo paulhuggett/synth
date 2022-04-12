@@ -7,7 +7,7 @@ if (APPLE)
   set (ICONS )
   set (BUNDLE_ID "com.paul-bowen-huggett.player")
 
-  set_target_properties(player_macos PROPERTIES
+  set_target_properties (player_macos PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME          player_macos
     MACOSX_BUNDLE_BUNDLE_VERSION       "1.0"
     MACOSX_BUNDLE_COPYRIGHT            "Copyright © 2022 Paul Bowen-Huggett"
