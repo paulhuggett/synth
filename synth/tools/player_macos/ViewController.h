@@ -4,4 +4,6 @@
 
 - (IBAction)waveformAction:(NSPopUpButton *)sender;
 
+@property (nonatomic, weak) IBOutlet NSTextField *frequencyLabel;
+
 @end

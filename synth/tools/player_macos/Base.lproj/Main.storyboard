@@ -718,8 +718,34 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="U9A-oU-074">
+                                <rect key="frame" x="100" y="150" width="255" height="28"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="20" maxValue="10000" doubleValue="440" tickMarkPosition="above" numberOfTickMarks="10" sliderType="linear" id="4vX-gh-f5L"/>
+                                <connections>
+                                    <action selector="frequencyAction:" target="XfG-lQ-9wD" id="dUL-b8-vhy"/>
+                                </connections>
+                            </slider>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MC7-VY-8gw">
+                                <rect key="frame" x="18" y="160" width="78" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Frequency:" id="hWL-wD-uvd">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4J8-W0-E4b">
+                                <rect key="frame" x="100" y="132" width="255" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Live frequency (Hz)" id="Ocg-jj-ymX">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="z5F-la-1Z1">
-                                <rect key="frame" x="90" y="199" width="97" height="25"/>
+                                <rect key="frame" x="99" y="199" width="97" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Sine" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="O3H-eq-ubY" id="Dbo-UI-4Vv">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -729,6 +755,9 @@
                                             <menuItem title="Sine" state="on" id="O3H-eq-ubY"/>
                                             <menuItem title="Square" tag="1" id="ow1-4e-gvo"/>
                                             <menuItem title="Triangle" tag="2" id="8Rx-Db-XDd"/>
+                                            <menuItem title="Sawtooth" tag="3" id="C5I-Nk-AQH" userLabel="Sawtooth">
+                                                <modifierMask key="keyEquivalentModifierMask"/>
+                                            </menuItem>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
@@ -736,16 +765,11 @@
                                     <action selector="waveformAction:" target="XfG-lQ-9wD" id="FpH-CQ-HiW"/>
                                 </connections>
                             </popUpButton>
-                            <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="U9A-oU-074">
-                                <rect key="frame" x="18" y="150" width="330" height="28"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="20" maxValue="10000" doubleValue="440" tickMarkPosition="above" numberOfTickMarks="10" sliderType="linear" id="4vX-gh-f5L"/>
-                                <connections>
-                                    <action selector="frequencyAction:" target="XfG-lQ-9wD" id="dUL-b8-vhy"/>
-                                </connections>
-                            </slider>
                         </subviews>
                     </view>
+                    <connections>
+                        <outlet property="frequencyLabel" destination="4J8-W0-E4b" id="5Dn-J6-MPg"/>
+                    </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

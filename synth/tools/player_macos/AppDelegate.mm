@@ -9,6 +9,8 @@ static constexpr UInt32 buffer_size = 0x1000;
 static constexpr auto numBuffers = 8U;
 static constexpr NSTimeInterval lockWaitTime = 1.0;
 
+// create audio queue
+// ~~~~~~~~~~~~~~~~~~
 static AudioQueueRef createAudioQueue (AudioQueueOutputCallback callback, void *userData) {
   AudioStreamBasicDescription d = {0};
   d.mSampleRate = static_cast<Float64> (synth::oscillator::sample_rate);
@@ -28,23 +30,38 @@ static AudioQueueRef createAudioQueue (AudioQueueOutputCallback callback, void *
   return queue;
 }
 
+// allocate buffers
+// ~~~~~~~~~~~~~~~~
 static AudioQueueBufferRef *allocateBuffers (AudioQueueRef queue) {
   auto *buffers =
       static_cast<AudioQueueBufferRef *> (malloc (sizeof (AudioQueueBufferRef) * numBuffers));
   for (unsigned ctr = 0U; ctr < numBuffers; ++ctr) {
     AudioQueueBufferRef buffer = nullptr;
-    OSStatus const erc = ::AudioQueueAllocateBuffer (queue, buffer_size, &buffer);
-    NSLog (@"AudioQueueAllocateBuffer erc=%d", static_cast<int> (erc));
+    if (OSStatus const erc = ::AudioQueueAllocateBuffer (queue, buffer_size, &buffer)) {
+      NSLog (@"AudioQueueAllocateBuffer erc=%d", static_cast<int> (erc));
+    }
     buffers[ctr] = buffer;
   }
   return buffers;
 }
 
-@interface AppDelegate () {
-  std::unique_ptr<synth::wavetable> sine_;
-  std::unique_ptr<synth::wavetable> square_;
-  std::unique_ptr<synth::wavetable> triangle_;
+// show error
+// ~~~~~~~~~~
+static void showError (OSStatus const erc) {
+  [[NSAlert alertWithError:[NSError errorWithDomain:NSOSStatusErrorDomain code:erc
+                                           userInfo:nil]] runModal];
+}
 
+static synth::wavetable const sine_wavetable{[] (double const theta) { return std::sin (theta); }};
+static synth::wavetable const square_wavetable{
+    [] (double const theta) { return theta <= synth::pi ? 1.0 : -1.0; }};
+static synth::wavetable const triangle_wavetable{[] (double const theta) {
+  return (theta <= synth::pi ? theta : (synth::two_pi - theta)) / synth::half_pi - 1.0;
+}};
+static synth::wavetable const sawtooth_wavetable{
+    [] (double const theta) { return theta / synth::pi - 1.0; }};
+
+@interface AppDelegate () {
   std::unique_ptr<synth::oscillator> osc_;
 
   Boolean running_;
@@ -87,7 +104,7 @@ static AudioQueueBufferRef *allocateBuffers (AudioQueueRef queue) {
 // callback
 // ~~~~~~~~
 static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueueBufferRef buffer) {
-  if (AppDelegate *const ad = static_cast<AppDelegate *> (userData)) {
+  if (AppDelegate *const ad = (__bridge AppDelegate *)userData) {
     [ad enqueueAudioBuffer:buffer];
   }
 }
@@ -97,26 +114,15 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
 - (id)init {
   self = [super init];
   if (self) {
-    queue_ = createAudioQueue (&callback, self);
+    queue_ = createAudioQueue (&callback, (__bridge void *)self);
     buffers_ = allocateBuffers (queue_);
     lock_ = [NSLock new];
     running_ = NO;
+    osc_.reset (new synth::oscillator (&sine_wavetable));
+    osc_->set_frequency (synth::oscillator::frequency::fromfp (440.0));
     // ...
   }
   return self;
-}
-
-static void showError (OSStatus const erc) {
-  [[NSAlert alertWithError:[NSError errorWithDomain:NSOSStatusErrorDomain code:erc
-                                           userInfo:nil]] runModal];
-}
-
-static constexpr inline double sine (double const theta) { return std::sin (theta); }
-static constexpr inline double square (double const theta) {
-  return theta <= synth::pi ? 1.0 : -1.0;
-}
-static constexpr inline double triangle (double const theta) {
-  return (theta <= synth::pi ? theta : (synth::two_pi - theta)) / synth::half_pi - 1.0;
 }
 
 // application did finish launching
@@ -125,14 +131,6 @@ static constexpr inline double triangle (double const theta) {
   if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     NSLog (@"applicationDidFinishLaunching could not obtain the lock in a reasonable time!");
   }
-
-  sine_.reset (new synth::wavetable{sine});
-  square_.reset (new synth::wavetable{square});
-  triangle_.reset (new synth::wavetable{triangle});
-
-  osc_.reset (new synth::oscillator (sine_.get ()));
-  osc_->set_frequency (synth::oscillator::frequency::fromfp (440.0));
-
   running_ = YES;
   [lock_ unlock];
 
@@ -184,32 +182,35 @@ static constexpr inline double triangle (double const theta) {
 // set waveform
 // ~~~~~~~~~~~~
 - (void)setWaveform:(NSInteger)tag {
-  synth::wavetable *w = nullptr;
+  synth::wavetable const *w = nullptr;
   NSString *name = @"";
   switch (tag) {
     case 0:
       name = @"sine";
-      w = sine_.get ();
+      w = &sine_wavetable;
       break;
     case 1:
       name = @"square";
-      w = square_.get ();
+      w = &square_wavetable;
       break;
     case 2:
       name = @"triangle";
-      w = triangle_.get ();
+      w = &triangle_wavetable;
+      break;
+    case 3:
+      name = @"sawtooth=";
+      w = &sawtooth_wavetable;
       break;
   }
   if (w == nullptr) {
     NSLog (@"setWaveform didn't understand waveform tag %ld", tag);
     return;
   }
-
+  NSLog (@"setting waveform to %@", name);
   if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     NSLog (@"setWaveform could not obtain the lock in a reasonable time!");
     return;
   }
-  NSLog (@"setting waveform to %@", name);
   osc_->set_wavetable (w);
   [lock_ unlock];
 }
@@ -217,11 +218,11 @@ static constexpr inline double triangle (double const theta) {
 // set frequency
 // ~~~~~~~~~~~~~
 - (void)setFrequency:(double)f {
+  NSLog (@"setFrequency %lf", f);
   if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     NSLog (@"setFrequency could not obtain the lock in a reasonable time!");
     return;
   }
-  NSLog (@"setFrequency %lf", f);
   osc_->set_frequency (synth::oscillator::frequency::fromfp (f));
   [lock_ unlock];
 }

@@ -1,12 +1,26 @@
 #import "ViewController.h"
 #import "AppDelegate.h"
 
+@interface ViewController () {
+  AppDelegate *appd_;
+}
+@end
+
 @implementation ViewController
+
+@synthesize frequencyLabel;
+
+- (id)init {
+  self = [super init];
+  if (self) {
+    appd_ = nil;
+  }
+  return self;
+}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-
-  // Do any additional setup after loading the view.
+  appd_ = [[NSApplication sharedApplication] delegate];
 }
 
 - (void)setRepresentedObject:(id)representedObject {
@@ -16,16 +30,22 @@
 }
 
 - (IBAction)waveformAction:(NSPopUpButton *)sender {
-  NSInteger const tag = [sender selectedTag];
-  NSLog (@"waveform action: %@ index:%ld tag:%ld", [sender selectedItem].title,
-         [sender indexOfSelectedItem], tag);
-  AppDelegate *const d = [[NSApplication sharedApplication] delegate];
-  [d setWaveform:tag];
+  if (appd_ != nil) {
+    [appd_ setWaveform:sender.selectedTag];
+  }
 }
 
 - (IBAction)frequencyAction:(NSSlider *)sender {
-  AppDelegate *const d = [[NSApplication sharedApplication] delegate];
-  [d setFrequency:sender.doubleValue];
+  double value = sender.doubleValue;
+  NSString *unit = @"Hz";
+  if (value > 5000.0) {
+    unit = @"kHz";
+    value /= 1000.0;
+  }
+  frequencyLabel.stringValue = [NSString stringWithFormat:@"%.3lf%@", value, unit];
+  if (appd_ != nil) {
+    [appd_ setFrequency:sender.doubleValue];
+  }
 }
 
 @end
