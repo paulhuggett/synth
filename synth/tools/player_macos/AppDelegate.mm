@@ -5,52 +5,9 @@
 #include "synth/nco.hpp"
 
 using SampleType = Float32;
-static constexpr UInt32 buffer_size = 0x1000;
+static constexpr UInt32 bufferSize = 0x1000;
 static constexpr auto numBuffers = 8U;
 static constexpr NSTimeInterval lockWaitTime = 1.0;
-
-// create audio queue
-// ~~~~~~~~~~~~~~~~~~
-static AudioQueueRef createAudioQueue (AudioQueueOutputCallback callback, void *userData) {
-  AudioStreamBasicDescription d = {0};
-  d.mSampleRate = static_cast<Float64> (synth::oscillator::sample_rate);
-  d.mFormatID = kAudioFormatLinearPCM;
-  d.mFormatFlags = kLinearPCMFormatFlagIsFloat;
-  d.mBytesPerPacket = UInt32{sizeof (SampleType)};
-  d.mFramesPerPacket = UInt32{1};
-  d.mBytesPerFrame = d.mBytesPerPacket * d.mFramesPerPacket;
-  d.mChannelsPerFrame = UInt32{1};
-  d.mBitsPerChannel = UInt32{8 * sizeof (SampleType)};
-
-  AudioQueueRef queue = nil;
-  OSStatus erc =
-      ::AudioQueueNewOutput (&d, callback, userData /* user data */, nullptr /*callback run loop*/,
-                             nullptr /*callback run loop mode*/, 0 /*flags*/, &queue);
-  NSLog (@"AudioQueueNewOutput erc=%d", static_cast<int> (erc));
-  return queue;
-}
-
-// allocate buffers
-// ~~~~~~~~~~~~~~~~
-static AudioQueueBufferRef *allocateBuffers (AudioQueueRef queue) {
-  auto *buffers =
-      static_cast<AudioQueueBufferRef *> (malloc (sizeof (AudioQueueBufferRef) * numBuffers));
-  for (unsigned ctr = 0U; ctr < numBuffers; ++ctr) {
-    AudioQueueBufferRef buffer = nullptr;
-    if (OSStatus const erc = ::AudioQueueAllocateBuffer (queue, buffer_size, &buffer)) {
-      NSLog (@"AudioQueueAllocateBuffer erc=%d", static_cast<int> (erc));
-    }
-    buffers[ctr] = buffer;
-  }
-  return buffers;
-}
-
-// show error
-// ~~~~~~~~~~
-static void showError (OSStatus const erc) {
-  [[NSAlert alertWithError:[NSError errorWithDomain:NSOSStatusErrorDomain code:erc
-                                           userInfo:nil]] runModal];
-}
 
 static synth::wavetable const sine_wavetable{[] (double const theta) { return std::sin (theta); }};
 static synth::wavetable const square_wavetable{
@@ -60,6 +17,28 @@ static synth::wavetable const triangle_wavetable{[] (double const theta) {
 }};
 static synth::wavetable const sawtooth_wavetable{
     [] (double const theta) { return theta / synth::pi - 1.0; }};
+
+// audio description
+// ~~~~~~~~~~~~~~~~~
+AudioStreamBasicDescription audioDescription (void) {
+  AudioStreamBasicDescription d = {0};
+  d.mSampleRate = static_cast<Float64> (synth::oscillator::sample_rate);
+  d.mFormatID = kAudioFormatLinearPCM;
+  d.mFormatFlags = kLinearPCMFormatFlagIsFloat;
+  d.mBytesPerPacket = UInt32{sizeof (SampleType)};
+  d.mFramesPerPacket = UInt32{1};
+  d.mBytesPerFrame = d.mBytesPerPacket * d.mFramesPerPacket;
+  d.mChannelsPerFrame = UInt32{1};
+  d.mBitsPerChannel = UInt32{8 * sizeof (SampleType)};
+  return d;
+}
+
+// show error
+// ~~~~~~~~~~
+static void showError (OSStatus const erc) {
+  [[NSAlert alertWithError:[NSError errorWithDomain:NSOSStatusErrorDomain code:erc
+                                           userInfo:nil]] runModal];
+}
 
 @interface AppDelegate () {
   std::unique_ptr<synth::oscillator> osc_;
@@ -73,13 +52,30 @@ static synth::wavetable const sawtooth_wavetable{
 
 @implementation AppDelegate
 
+// init
+// ~~~~
+- (id)init {
+  self = [super init];
+  if (self) {
+    queue_ = nil;
+    buffers_ = nil;
+    lock_ = [NSLock new];
+    running_ = NO;
+    osc_.reset (new synth::oscillator (&sine_wavetable));
+    osc_->set_frequency (synth::oscillator::frequency::fromfp (440.0));
+    // ...
+  }
+  return self;
+}
+
 // enqueue audio buffer
 // ~~~~~~~~~~~~~~~~~~~~
-- (void)enqueueAudioBuffer:(AudioQueueBufferRef)buffer {
+- (OSStatus)enqueueAudioBuffer:(AudioQueueBufferRef)buffer {
   UInt32 samples = buffer->mAudioDataBytesCapacity / sizeof (SampleType);
   auto *const first = static_cast<SampleType *> (buffer->mAudioData);
   auto *const last = first + samples;
 
+  OSStatus erc = noErr;
   Boolean running = NO;
   if ([lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     running = running_;
@@ -95,10 +91,12 @@ static synth::wavetable const sawtooth_wavetable{
   }
 
   if (running) {
-    if (OSStatus const erc = ::AudioQueueEnqueueBuffer (queue_, buffer, 0U, nullptr)) {
+    erc = ::AudioQueueEnqueueBuffer (queue_, buffer, 0U, nullptr);
+    if (erc != noErr) {
       NSLog (@"AudioQueueEnqueueBuffer error %d", erc);
     }
   }
+  return erc;
 }
 
 // callback
@@ -109,49 +107,40 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
   }
 }
 
-// init
-// ~~~~
-- (id)init {
-  self = [super init];
-  if (self) {
-    queue_ = createAudioQueue (&callback, (__bridge void *)self);
-    buffers_ = allocateBuffers (queue_);
-    lock_ = [NSLock new];
-    running_ = NO;
-    osc_.reset (new synth::oscillator (&sine_wavetable));
-    osc_->set_frequency (synth::oscillator::frequency::fromfp (440.0));
-    // ...
-  }
-  return self;
-}
-
 // application did finish launching
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-  if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
-    NSLog (@"applicationDidFinishLaunching could not obtain the lock in a reasonable time!");
-  }
   running_ = YES;
-  [lock_ unlock];
 
-  // prime the buffers
-  for (unsigned ctr = 0U; ctr < numBuffers; ++ctr) {
-    [self enqueueAudioBuffer:buffers_[ctr]];
+  AudioStreamBasicDescription const description = audioDescription ();
+  OSStatus erc = ::AudioQueueNewOutput (&description, callback, (__bridge void *)self,
+                                        nullptr /*callback run loop*/,
+                                        nullptr /*callback run loop mode*/, 0 /*flags*/, &queue_);
+  if (erc == noErr) {
+    buffers_ =
+        static_cast<AudioQueueBufferRef *> (calloc (numBuffers, sizeof (AudioQueueBufferRef)));
+    for (unsigned ctr = 0U; ctr < numBuffers && erc == noErr; ++ctr) {
+      erc = ::AudioQueueAllocateBuffer (queue_, bufferSize, &buffers_[ctr]);
+      if (erc == noErr) {
+        // prime this buffer
+        erc = [self enqueueAudioBuffer:buffers_[ctr]];
+      }
+    }
   }
 
-  UInt32 framesPrepared = 0;
-  if (OSStatus const erc = ::AudioQueuePrime (queue_, framesPrepared, &framesPrepared)) {
-    NSLog (@"AudioQueuePrime returned %d", static_cast<int> (erc));
-    showError (erc);
-    [[NSApplication sharedApplication] terminate:self];
-    return;
+  if (erc == noErr) {
+    UInt32 framesPrepared = 0;
+    erc = ::AudioQueuePrime (queue_, framesPrepared, &framesPrepared);
   }
 
-  if (OSStatus const erc = ::AudioQueueStart (queue_, nullptr /* start time */)) {
+  if (erc == noErr) {
+    erc = ::AudioQueueStart (queue_, nullptr /* start time */);
+  }
+
+  if (erc != noErr) {
     NSLog (@"AudioQueueStart returned %d", static_cast<int> (erc));
     showError (erc);
     [[NSApplication sharedApplication] terminate:self];
-    return;
   }
 }
 
@@ -165,12 +154,15 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
     NSLog (@"applicationWillTerminate could not obtain the lock in a reasonable time!");
   }
 
-  OSStatus erc = ::AudioQueueFlush (queue_);
-  NSLog (@"AudioQueueFlush returned %d", static_cast<int> (erc));
-  erc = ::AudioQueueStop (queue_, true /*immediate*/);
-  NSLog (@"AudioQueueStop returned %d", static_cast<int> (erc));
-  erc = ::AudioQueueDispose (queue_, true /*immediate*/);
-  NSLog (@"AudioQueueDispose returned %d", static_cast<int> (erc));
+  if (OSStatus const erc = ::AudioQueueFlush (queue_)) {
+    NSLog (@"AudioQueueFlush returned %d", static_cast<int> (erc));
+  }
+  if (OSStatus const erc = ::AudioQueueStop (queue_, true /*immediate*/)) {
+    NSLog (@"AudioQueueStop returned %d", static_cast<int> (erc));
+  }
+  if (OSStatus const erc = ::AudioQueueDispose (queue_, true /*immediate*/)) {
+    NSLog (@"AudioQueueDispose returned %d", static_cast<int> (erc));
+  }
 }
 
 // application supports secure restorable state
@@ -207,6 +199,7 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
     return;
   }
   NSLog (@"setting waveform to %@", name);
+
   if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     NSLog (@"setWaveform could not obtain the lock in a reasonable time!");
     return;
