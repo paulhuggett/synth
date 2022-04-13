@@ -9,14 +9,6 @@ static constexpr UInt32 bufferSize = 0x1000;
 static constexpr auto numBuffers = 8U;
 static constexpr NSTimeInterval lockWaitTime = 1.0;
 
-static synth::wavetable const sine_wavetable{[] (double const theta) { return std::sin (theta); }};
-static synth::wavetable const square_wavetable{
-    [] (double const theta) { return theta <= synth::pi ? 1.0 : -1.0; }};
-static synth::wavetable const triangle_wavetable{[] (double const theta) {
-  return (theta <= synth::pi ? theta : (synth::two_pi - theta)) / synth::half_pi - 1.0;
-}};
-static synth::wavetable const sawtooth_wavetable{
-    [] (double const theta) { return theta / synth::pi - 1.0; }};
 
 // audio description
 // ~~~~~~~~~~~~~~~~~
@@ -61,7 +53,7 @@ static void showError (OSStatus const erc) {
     buffers_ = nil;
     lock_ = [NSLock new];
     running_ = NO;
-    osc_.reset (new synth::oscillator (&sine_wavetable));
+    osc_.reset (new synth::oscillator (&synth::sine));
     osc_->set_frequency (synth::oscillator::frequency::fromfp (440.0));
     // ...
   }
@@ -179,19 +171,19 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
   switch (tag) {
     case 0:
       name = @"sine";
-      w = &sine_wavetable;
+      w = &synth::sine;
       break;
     case 1:
       name = @"square";
-      w = &square_wavetable;
+      w = &synth::square;
       break;
     case 2:
       name = @"triangle";
-      w = &triangle_wavetable;
+      w = &synth::triangle;
       break;
     case 3:
       name = @"sawtooth=";
-      w = &sawtooth_wavetable;
+      w = &synth::sawtooth;
       break;
   }
   if (w == nullptr) {

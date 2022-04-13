@@ -58,6 +58,11 @@ private:
   std::array<amplitude, table_size_> y_;
 };
 
+extern wavetable const sine;
+extern wavetable const square;
+extern wavetable const triangle;
+extern wavetable const sawtooth;
+
 }  // end namespace synth
 
 #endif  // SYNTH_WAVETABLE_HPP

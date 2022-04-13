@@ -9,6 +9,7 @@ add_library (synth STATIC
   "${SYNTH_INCLUDES}/synth/wavetable.hpp"
 
   envelope.cpp
+  wavetable.cpp
 )
 target_include_directories (synth PUBLIC "${SYNTH_INCLUDES}")
 setup_target (synth)

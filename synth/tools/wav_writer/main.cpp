@@ -17,16 +17,6 @@ using namespace synth;
 
 namespace {
 
-// theta is from [0..2π)
-wavetable const sine{[] (double const theta) { return std::sin (theta); }};
-wavetable const saw{
-    [] (double const theta) { return (2.0 / two_pi) * theta - 1.0; }};
-wavetable const triangle{[] (double const theta) {
-  return (theta <= pi ? theta : (two_pi - theta)) / half_pi - 1.0;
-}};
-wavetable const square{
-    [] (double const theta) { return theta <= pi ? 1.0 : -1.0; }};
-
 void dump_wavetable (wavetable const &w) {
   std::ostream &os = std::cout;
   os << std::hex;
@@ -197,7 +187,7 @@ int main () {
     static constexpr auto two_seconds = sample_rate * 2U;
     oscillator osc{&sine};
     osc.set_frequency (frequency::fromfp (440.0));
-    osc.set_wavetable (&saw);
+    osc.set_wavetable (&sawtooth);
     std::generate_n (std::back_inserter (samples), two_seconds,
                      oscillator_double{&osc});
     osc.set_wavetable (&square);
