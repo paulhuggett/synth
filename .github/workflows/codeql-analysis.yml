@@ -1,3 +1,5 @@
+-*- coding: utf-8 -*-
+
 # For most projects, this workflow file will not need changing; you simply need
 # to commit it to your repository.
 #
@@ -50,21 +52,20 @@ jobs:
         # Prefix the list here with "+" to use these queries and those in the config file.
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
-    # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
-    # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{ runner.workspace }}/build
 
-    # ℹ️ Command-line programs to run using the OS shell.
-    # 📚 https://git.io/JvXDl
+    - name: Configure CMake
+      shell: bash
+      run: |
+          cmake -G "Unix Makefiles"         \
+                -D CMAKE_BUILD_TYPE=Release \
+                -S $GITHUB_WORKSPACE        \
+                -B ${{ runner.workspace }}/build
 
-    # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
-    #    and modify them (or add more) to build your code if your project
-    #    uses a compiled language
-
-    #- run: |
-    #   make bootstrap
-    #   make release
+    - name: Build
+      shell: bash
+      run: cmake --build ${{ runner.workspace }}/build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
