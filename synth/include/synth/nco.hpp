@@ -13,9 +13,9 @@
 #include "wavetable.hpp"
 
 #if !defined(__clang_major__) || __clang_major__ < 7
-#define NONNULL _Nonnull
-#else
 #define NONNULL
+#else
+#define NONNULL _Nonnull
 #endif
 
 namespace synth {
