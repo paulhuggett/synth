@@ -12,8 +12,8 @@
 #include "uint.hpp"
 #include "wavetable.hpp"
 
-#ifdef __clang__
-#define NONNULL __nonnull
+#if !defined(__clang_major__) || __clang_major__ < 7
+#define NONNULL _Nonnull
 #else
 #define NONNULL
 #endif
