@@ -1,4 +1,4 @@
-name: CI Build/Test
+name: CI Build & Test
 # Triggers the workflow on push or pull request events
 on: [push, pull_request]
 jobs:
@@ -18,6 +18,20 @@ jobs:
                       generator: Xcode
                       os: macos-latest
 
+                    # iOS builds
+                    # ~~~~~~~~~~~~
+                    - name: iOS/Xcode/Debug
+                      build_type: Debug
+                      options: -DCMAKE_SYSTEM_NAME=iOS
+                      generator: Xcode
+                      os: macos-latest
+
+                    - name: iOS/Xcode/Release
+                      build_type: Release
+                      options: -DCMAKE_SYSTEM_NAME=iOS
+                      generator: Xcode
+                      os: macos-latest
+
 
                     # Ubuntu builds
                     # ~~~~~~~~~~~~~
@@ -25,7 +39,6 @@ jobs:
                       build_type: Debug
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
                       generator: Unix Makefiles
-                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
                       os: ubuntu-latest
 
                     - name: Ubuntu-latest/gcc-10/Release
