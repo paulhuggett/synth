@@ -9,6 +9,7 @@
 #include "synth/envelope.hpp"
 #include "synth/nco.hpp"
 #include "synth/voice.hpp"
+#include "synth/voice_assigner.hpp"
 
 // Local includes
 #include "wav_file.hpp"
@@ -69,49 +70,6 @@ void chirp (std::vector<double> *const samples) {
 
 }  // end anonymous namespace
 
-class voice_assign {
-public:
-  voice_assign () = default;
-
-  void note_on (unsigned const note) {
-    if (voices_[next_].note != unassigned) {
-      voices_[next_].v.note_off ();
-    }
-    voices_[next_].note = note;
-    voices_[next_].v.note_on (note);
-    ++next_;
-    if (next_ >= voices_.size ()) {
-      next_ = 0U;
-    }
-  }
-
-  void note_off (unsigned const note) {
-    for (auto &v : voices_) {
-      if (v.note == note) {
-        v.v.note_off ();
-        v.note = unassigned;
-      }
-    }
-  }
-
-  double tick () {
-    return std::accumulate (std::begin (voices_), std::end (voices_), 0.0,
-                            [] (double acc, vm &v) {
-                              return acc + v.v.tick ().as_double ();
-                            }) /
-           voices_.size ();
-  }
-
-private:
-  static constexpr auto unassigned = std::numeric_limits<unsigned>::max ();
-  struct vm {
-    vm () : v{&sine}, note{unassigned} {}
-    voice v;
-    unsigned note;
-  };
-  std::array<vm, 4> voices_;
-  unsigned next_ = 0U;
-};
 
 int main () {
   std::vector<double> samples;
@@ -132,26 +90,18 @@ int main () {
 
   if constexpr ((true)) {
     // Play a scale of C major using a collection of voices.
-    voice_assign voices;
-    std::array<unsigned, 8> const c_major_scale{{
-        c4,        // C4
-        c4 + 2U,   // D4
-        c4 + 4U,   // E4
-        c4 + 5U,   // F4
-        c4 + 7U,   // G4
-        c4 + 9U,   // A4
-        c4 + 11U,  // B4
-        c4 + 12U,  // C5
-    }};
+    synth::voice_assigner voices;
+    std::array<unsigned const, 8> const major_scale{
+        {0U, 2U, 4U, 5U, 7U, 9U, 11U, 12U}};
 
-    for (auto const note : c_major_scale) {
-      voices.note_on (note);
+    for (auto const note : major_scale) {
+      voices.note_on (c4 + note);
       for (auto ctr = 0U; ctr < one_second / 4; ++ctr) {
         samples.emplace_back (voices.tick ());
       }
       // voices.note_off (note);
     }
-    for (auto const note : c_major_scale) {
+    for (auto const note : major_scale) {
       voices.note_off (note);
     }
     for (auto ctr = 0U; ctr < one_second / 10U; ++ctr) {

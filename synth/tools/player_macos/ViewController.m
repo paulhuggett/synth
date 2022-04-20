@@ -2,7 +2,7 @@
 #import "AppDelegate.h"
 
 @interface ViewController () {
-  AppDelegate *appd_;
+  AppDelegate *_Nullable appd_;
 }
 @end
 
@@ -24,17 +24,24 @@
 // ~~~~~~~~~~~~~
 - (void)viewDidLoad {
   [super viewDidLoad];
+#if TARGET_OS_OSX
   appd_ = [[NSApplication sharedApplication] delegate];
+#elif TARGET_OS_IOS
+  appd_ = [[UIApplication sharedApplication] delegate];
+#endif
 }
 
 // set represented object
 // ~~~~~~~~~~~~~~~~~~~~~~
+#if TARGET_OS_OSX
 - (void)setRepresentedObject:(id)representedObject {
   [super setRepresentedObject:representedObject];
 
   // Update the view, if already loaded.
 }
+#endif
 
+#if TARGET_OS_OSX
 // waveform action
 // ~~~~~~~~~~~~~~~
 - (IBAction)waveformAction:(NSPopUpButton *)sender {
@@ -57,5 +64,31 @@
     [appd_ setFrequency:sender.doubleValue];
   }
 }
+
+#elif TARGET_OS_IOS
+
+// waveform action
+// ~~~~~~~~~~~~~~~
+- (IBAction)waveformAction:(UISegmentedControl *)sender {
+  if (appd_ != nil) {
+  }
+}
+
+// frequency action
+// ~~~~~~~~~~~~~~~~
+- (IBAction)frequencyAction:(UISlider *)sender {
+  float value = sender.value;
+  NSString *unit = @"Hz";
+  if (value > 5000.0F) {
+    unit = @"kHz";
+    value /= 1000.0F;
+  }
+  frequencyLabel.text = [NSString stringWithFormat:@"%.3lf%@", (double)value, unit];
+  if (appd_ != nil) {
+    [appd_ setFrequency:(double)sender.value];
+  }
+}
+
+#endif
 
 @end

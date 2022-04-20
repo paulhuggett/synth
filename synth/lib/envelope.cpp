@@ -10,6 +10,8 @@ void envelope::note_off () {
   phase_ = phase::release;
 }
 
+bool envelope::active () const { return phase_ != phase::idle; }
+
 auto envelope::tick (amplitude const v) -> amplitude {
   switch (phase_) {
     case phase::attack:
@@ -19,7 +21,6 @@ auto envelope::tick (amplitude const v) -> amplitude {
       phase_ = phase::decay;
       time_ = time (decay_time);
       // FALLTHROUGH
-
     case phase::decay:
       if (time_ > 0U) {
         return amplitude::fromfp (v.as_double () * (--time_ * decay + sustain));
@@ -28,16 +29,14 @@ auto envelope::tick (amplitude const v) -> amplitude {
       // FALLTHROUGH
     case phase::sustain:
       return amplitude::fromfp (v.as_double () * sustain);
-
     case phase::release:
       if (time_ > 0U) {
         return amplitude::fromfp (v.as_double () *
                                   (--time_ * release - sustain));
       }
-      phase_ = phase::done;
+      phase_ = phase::idle;
       // FALLTHROUGH
-
-    case phase::done:
+    case phase::idle:
       break;
   }
   time_ = 0U;

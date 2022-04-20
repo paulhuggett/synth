@@ -18,11 +18,12 @@ public:
 
   void note_on ();
   void note_off ();
+  bool active () const;
 
   amplitude tick (amplitude const v);
 
 private:
-  enum class phase { attack, decay, sustain, release, done };
+  enum class phase { idle, attack, decay, sustain, release };
   static constexpr double attack =
       1.0 / (attack_time * oscillator::sample_rate);
   static constexpr double decay =
@@ -30,7 +31,7 @@ private:
   static constexpr double release =
       1.0 / (release_time * oscillator::sample_rate);
 
-  phase phase_ = phase::attack;
+  phase phase_ = phase::idle;
   unsigned time_ = 0;
 
   static unsigned time (double seconds) {

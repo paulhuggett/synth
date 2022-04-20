@@ -31,6 +31,7 @@ private:
 
 public:
   void tick () {
+    std::cout << "oscillator tick\n";
     if (reset.read ()) {
       phase_ = 0;
     }
@@ -38,7 +39,8 @@ public:
         this->phase_increment (this->f.read ());  // TODO: only when f changes.
 
     sample = this->phase_accumulator ();
-    // sine.phase = sample;
+    // sine.phase.write (sample);
+    //  sine.phase = sample;
     out.write (sine.out.read ());
     // out.write (w_->phase_to_amplitude (this->phase_accumulator ())); // TODO:
     // on clock edge.

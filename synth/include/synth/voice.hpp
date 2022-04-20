@@ -4,6 +4,7 @@
 
 #include <array>
 
+#include "envelope.hpp"
 #include "nco.hpp"
 
 namespace synth {
@@ -29,21 +30,12 @@ public:
   explicit constexpr voice (wavetable const* const NONNULL w)
       : osc_{{oscillator{w}, oscillator{w}}} {}
 
-  void note_on (unsigned const note) {
-    auto const f = midi_note_to_frequency (note);
-    osc_[0].set_frequency (frequency::fromfp (f));        // 8'
-    osc_[1].set_frequency (frequency::fromfp (f / 2.0));  // 16'
-    env_.note_on ();
-  }
-  void note_off () { env_.note_off (); }
+  void note_on (unsigned const note);
+  void note_off ();
 
-  amplitude tick () {
-    double const a = std::accumulate (std::begin (osc_), std::end (osc_), 0.0,
-                                      [] (double const acc, oscillator& osc) {
-                                        return acc + osc.tick ().as_double ();
-                                      });
-    return env_.tick (amplitude::fromfp (a));
-  }
+  void set_wavetable (wavetable const* const NONNULL w);
+
+  amplitude tick ();
 
 private:
   std::array<oscillator, 2> osc_;

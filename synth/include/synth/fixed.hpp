@@ -2,6 +2,7 @@
 #ifndef SYNTH_FIXED_HPP
 #define SYNTH_FIXED_HPP
 
+#include <cassert>
 #include <ostream>
 
 #include "uint.hpp"

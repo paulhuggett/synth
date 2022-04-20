@@ -1,5 +1,5 @@
 project (synth CXX)
-cmake_minimum_required (VERSION 3.22)
+cmake_minimum_required (VERSION 3.16)
 
 option (WERROR "Errors as warnings" Off)
 set (CMAKE_CXX_STANDARD 17 CACHE STRING "C++ Standard Version")
