@@ -52,7 +52,7 @@ if (APPLE)
 
 
 
-  if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
+  if (SYSTEM_IS_IOS)
     add_executable (player_ios MACOSX_BUNDLE)
 
     set (STORYBOARDS
@@ -105,6 +105,6 @@ if (APPLE)
       -Wno-direct-ivar-access
     )
 
-  endif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
+  endif (SYSTEM_IS_IOS)
 
 endif (APPLE)

@@ -4,6 +4,12 @@ cmake_minimum_required (VERSION 3.16)
 option (WERROR "Errors as warnings" Off)
 set (CMAKE_CXX_STANDARD 17 CACHE STRING "C++ Standard Version")
 
+if (APPLE AND ${CMAKE_SYSTEM_NAME} MATCHES "iOS")
+  set (SYSTEM_IS_IOS Yes)
+else()
+  set (SYSTEM_IS_IOS No)
+endif ()
+
 function (setup_target target)
   set (clang_options
     -Weverything
@@ -41,8 +47,10 @@ function (setup_target target)
   )
 endfunction (setup_target)
 
-add_subdirectory (systemc)
-add_subdirectory (cordic_sine)
-add_subdirectory (gentable)
+if (NOT SYSTEM_IS_IOS)
+  add_subdirectory (systemc)
+  add_subdirectory (cordic_sine)
+  add_subdirectory (gentable)
+  add_subdirectory (scsynth)
+endif ()
 add_subdirectory (synth)
-add_subdirectory (scsynth)
