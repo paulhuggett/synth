@@ -67,7 +67,10 @@ jobs:
         runs-on: ${{ matrix.os }}
 
         steps:
-            - uses: actions/checkout@v2
+            - name: Checkout repository
+              uses: actions/checkout@v3
+              with:
+                submodules: 'True'
 
             - name: Install Dependencies (Linux)
               if: matrix.os == 'ubuntu-latest' && matrix.apt_install != ''
