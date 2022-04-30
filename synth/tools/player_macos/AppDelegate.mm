@@ -95,13 +95,12 @@ static void stopAudio (AudioQueueRef queue) {
   double masterVolume = 0.5;
 
   OSStatus erc = noErr;
-  Boolean running = NO;
+  BOOL running = NO;
   if ([lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     running = running_;
     if (running) {
       for (auto *it = first; it != last; ++it) {
         *it = voices_->tick () * masterVolume;
-        //        *it = osc_->tick ().as_double () * masterVolume;
       }
     }
     [lock_ unlock];
@@ -119,49 +118,89 @@ static void stopAudio (AudioQueueRef queue) {
   return erc;
 }
 
-// play scale
-// ~~~~~~~~~~
-- (void)playScale {
-  static constexpr int scaleMembers = 8;
-  static unsigned const majorScale[scaleMembers] = {0U, 2U, 4U, 5U, 7U, 9U, 11U, 12U};
-  constexpr auto c4 = 60U;  // (middle C)
-
-  NSLock *const lock = self->lock_;
-  NSDate *t = [NSDate now];
-  BOOL ok = YES;
-  BOOL keyDown = YES;
-  int index = 0;
-  int direction = -1;
-  if ([lock lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
-    while (self->running_ && ok) {
-      // lock owned
-      unsigned const note = c4 + majorScale[index];
-      if (keyDown) {
-        NSLog (@"note on %u", note);
-        self->voices_->note_on (note);
-      } else {
-        NSLog (@"note off %u", note);
-        self->voices_->note_off (note);
+// read MIDI packet list
+// ~~~~~~~~~~~~~~~~~~~~~
+- (void)readMIDIPacketList:(MIDIPacketList const *)pktlist {
+  auto const *packet = pktlist->packet;
+  for (UInt32 packet_ctr = 0; packet_ctr < pktlist->numPackets; ++packet_ctr) {
+    Byte const *byte = packet->data;
+    Byte const *const end = byte + packet->length;
+    while (byte != end) {
+      uint8_t const message = *(byte++);
+      // Status bytes are eight-bit binary numbers in which the Most Significant Bit (MSB) is set
+      // (binary 1). Status bytes serve to identify the message type, that is, the purpose of the
+      // Data bytes which follow it.
+      if ((message & 0x0b10000000) == 1U) {
+        NSLog (@"status byte");
+        continue;
       }
-      // lock released
-      [lock unlock];
-
-      // update local state
-      if (!keyDown) {
-        if (index <= 0 || index >= scaleMembers - 1) {
-          direction = -direction;
-        }
-        index += direction;
+      unsigned const chan = message & 0x0F;
+      switch (message >> 4) {
+        case 0b1000:  // Note-Off
+        {
+          unsigned const note = *(byte++);      // TODO: bit 7 must be 0.
+          unsigned const velocity = *(byte++);  // TODO: bit 7 must be 0.
+          // NSLog (@"Note off chan=%u, note=%u, velocity=%u", chan, note, velocity);
+          if ([self->lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
+            self->voices_->note_off (note);
+            [self->lock_ unlock];
+          }
+        } break;
+        case 0b1001:  // Note-On
+        {
+          unsigned const note = *(byte++);      // TODO: bit 7 must be 0.
+          unsigned const velocity = *(byte++);  // TODO: bit 7 must be 0.
+          if ([self->lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
+            if (velocity == 0) {
+              // NSLog (@"Note off chan=%u, note=%u, velocity=%u", chan, note, velocity);
+              self->voices_->note_off (note);
+            } else {
+              // NSLog (@"Note on chan=%u, note=%u, velocity=%u", chan, note, velocity);
+              self->voices_->note_on (note);
+            }
+            [self->lock_ unlock];
+          }
+        } break;
+        case 0b1010:  // Polyphonic Key Pressure
+        {
+          unsigned const note = *(byte++);      // TODO: bit 7 must be 0.
+          unsigned const velocity = *(byte++);  // TODO: bit 7 must be 0.
+          NSLog (@"Poly Pressure chan=%u, note=%u, velocity=%u", chan, note, velocity);
+        } break;
+        case 0b1011:  // Control Change
+        {
+          unsigned const controller = *(byte++);  // TODO: bit 7 must be 0.
+          unsigned const value = *(byte++);       // TODO: bit 7 must be 0.
+          NSLog (@"CC chan=%u, controller=%u, value=%u", chan, controller, value);
+        } break;
+        case 0b1100:  // Program change
+        {
+          unsigned const program_number = *(byte++);  // TODO: bit 7 must be 0.
+          NSLog (@"Program change chan=%u, no.=%u", chan, program_number);
+        } break;
+        case 0b1101:  // Channel Pressure (aftertouch)
+        {
+          unsigned const program_number = *(byte++);  // TODO: bit 7 must be 0.
+          NSLog (@"Channel Pressure chan=%u, value=%u", chan, program_number);
+        } break;
+        case 0b1110:  // Pitch Bend
+        {
+          uint16_t const low = *(byte++);   // TODO: bit 7 must be 0.
+          uint16_t const high = *(byte++);  // TODO: bit 7 must be 0.
+          NSLog (@"Pitch Bend chan=%u, value=%u", chan, (high << 7) | low);
+        } break;
+        case 0xF0:  // System Message: skip args
+        default:
+          break;
       }
-      keyDown = !keyDown;
-
-      // back to sleep for another iteration.
-      t = [NSDate dateWithTimeInterval:0.1 sinceDate:t];
-      [NSThread sleepUntilDate:t];
-      ok = [lock lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]];
     }
+    packet = MIDIPacketNext (packet);
+  }
+}
 
-    [lock unlock];
+static void ReadMIDIdevice (MIDIPacketList const *pktlist, void *userData, void *connRefCon) {
+  if (AppDelegate *const ad = (__bridge AppDelegate *)connRefCon) {
+    [ad readMIDIPacketList:pktlist];
   }
 }
 
@@ -226,9 +265,35 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
 #endif
   }
 
+#if 1
   dispatch_async (dispatch_get_global_queue (QOS_CLASS_USER_INITIATED, 0), ^{
-    [self playScale];
+    MIDIClientRef client = 0;
+    MIDIPortRef port = 0;
+    OSStatus erc = MIDIClientCreate (CFSTR ("MIDI Client"), nullptr /*notify proc*/,
+                                     nullptr /*notifyRefCon*/, &client);
+    NSLog (@"MIDIClientCreate: %u", erc);
+    erc = MIDIInputPortCreate (client, CFSTR ("MIDI Input Port"), ReadMIDIdevice,
+                               nullptr /*refCon*/, &port);
+    NSLog (@"MIDIInputPortCreate: %u", erc);
+
+    ItemCount const sources = MIDIGetNumberOfSources ();
+    NSLog (@"There are %u sources", static_cast<unsigned> (sources));
+    if (sources == 0) {
+      NSLog (@"No MIDI source was available");
+      return;
+    }
+
+    MIDIEndpointRef ep = MIDIGetSource (0);
+
+    CFStringRef pname = Nil;
+    MIDIObjectGetStringProperty (ep, kMIDIPropertyName, &pname);
+    NSLog (@"Connected to: %@", pname);
+    CFRelease (pname);
+
+    erc = MIDIPortConnectSource (port, ep, (__bridge void *)self /*connRefCon*/);
+    NSLog (@"MIDIPortConnectSource: %d", erc);
   });
+#endif
 
 #if TARGET_OS_IOS
   return YES;
@@ -307,6 +372,18 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
     return;
   }
   // osc_->set_frequency (synth::oscillator::frequency::fromfp (f));
+  [lock_ unlock];
+}
+
+- (void)setEnvelopeStage:(synth::envelope::phase)stage to:(double)value {
+  NSString *names[5] = {@"idle", @"attack", @"decay", @"sustain", @"release"};
+  NSLog (@"Envelope %@ %f", names[static_cast<int> (stage)], value);
+
+  if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
+    NSLog (@"setEnvelopeStage:to: could not obtain the lock in a reasonable time!");
+    return;
+  }
+  voices_->set_envelope (stage, value);
   [lock_ unlock];
 }
 

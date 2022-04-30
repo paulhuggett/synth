@@ -30,7 +30,7 @@ if (APPLE)
       AppDelegate.mm
       Assets.xcassets
       ViewController.h
-      ViewController.m
+      ViewController.mm
       player_macos.m
       macOS/player_macos.entitlements
       ${STORYBOARDS}
@@ -38,9 +38,11 @@ if (APPLE)
     setup_target (player_macos)
     find_library (COCOA_LIBRARY Cocoa)
     find_library (AUDIOTOOLBOX_LIBRARY AudioToolbox)
+    find_library (COREMIDI_LIBRARY CoreMIDI)
     target_link_libraries (player_macos PRIVATE
       ${COCOA_LIBRARY}
       ${AUDIOTOOLBOX_LIBRARY}
+      ${COREMIDI_LIBRARY}
       synth
     )
     target_compile_options (player_macos PRIVATE
@@ -85,7 +87,7 @@ if (APPLE)
       AppDelegate.mm
       Assets.xcassets
       ViewController.h
-      ViewController.m
+      ViewController.mm
       player_macos.m
       ${STORYBOARDS}
     )
@@ -95,9 +97,11 @@ if (APPLE)
     setup_target (player_ios)
     find_library (UIKIT_LIBRARY UIKit)
     find_library (AUDIOTOOLBOX_LIBRARY AudioToolbox)
+    find_library (COREMIDI_LIBRARY CoreMIDI)
     target_link_libraries (player_ios PRIVATE
       ${UIKIT_LIBRARY}
       ${AUDIOTOOLBOX_LIBRARY}
+      ${COREMIDI_LIBRARY}
       synth
     )
     target_compile_options (player_ios PRIVATE

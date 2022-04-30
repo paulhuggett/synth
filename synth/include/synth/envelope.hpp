@@ -10,29 +10,26 @@ namespace synth {
 
 class envelope {
 public:
-  static constexpr double attack_time = 0.05;
-  static constexpr double decay_time = 0.05;
-  static constexpr double sustain = 0.5;
-  static constexpr double release_time = 0.2;
   using amplitude = wavetable::amplitude;
 
   void note_on ();
   void note_off ();
   bool active () const;
 
+  enum class phase { idle, attack, decay, sustain, release };
+
+  void set (phase p, double value);
+
   amplitude tick (amplitude const v);
 
 private:
-  enum class phase { idle, attack, decay, sustain, release };
-  static constexpr double attack =
-      1.0 / (attack_time * oscillator::sample_rate);
-  static constexpr double decay =
-      sustain / (decay_time * oscillator::sample_rate);
-  static constexpr double release =
-      1.0 / (release_time * oscillator::sample_rate);
+  double attack_ = 0.0;
+  double decay_ = 0.0;
+  double sustain_ = 1.0;
+  double release_ = 0.0;
 
   phase phase_ = phase::idle;
-  unsigned time_ = 0;
+  amplitude a_;
 
   static unsigned time (double seconds) {
     return static_cast<unsigned> (

@@ -3,22 +3,16 @@
 
 @interface ViewController () {
   AppDelegate *_Nullable appd_;
+
+  NSImage *activeImage_;
+  NSImage *inactiveImage_;
 }
 @end
 
 @implementation ViewController
 
 @synthesize frequencyLabel;
-
-// init
-// ~~~~
-- (id)init {
-  self = [super init];
-  if (self) {
-    appd_ = nil;
-  }
-  return self;
-}
+@synthesize voices;
 
 // view did load
 // ~~~~~~~~~~~~~
@@ -29,6 +23,12 @@
 #elif TARGET_OS_IOS
   appd_ = [[UIApplication sharedApplication] delegate];
 #endif
+  activeImage_ = [NSImage imageNamed:NSImageNameStatusAvailable];
+  inactiveImage_ = [NSImage imageNamed:NSImageNameStatusUnavailable];
+
+  for (int segment = 0, lastSegment = voices.segmentCount; segment < lastSegment; ++segment) {
+    [voices setImage:inactiveImage_ forSegment:segment];
+  }
 }
 
 // set represented object
@@ -62,6 +62,30 @@
   frequencyLabel.stringValue = [NSString stringWithFormat:@"%.3lf%@", value, unit];
   if (appd_ != nil) {
     [appd_ setFrequency:sender.doubleValue];
+  }
+}
+
+// ADSR action
+// ~~~~~~~~~~~
+// Called when the value of one of the envelope sliders is changed.
+- (IBAction)adsrAction:(NSSlider *)sender {
+  if (appd_ != nil) {
+    auto stage = synth::envelope::phase::idle;
+    switch (sender.tag) {
+      case 0:
+        stage = synth::envelope::phase::attack;
+        break;
+      case 1:
+        stage = synth::envelope::phase::decay;
+        break;
+      case 2:
+        stage = synth::envelope::phase::sustain;
+        break;
+      case 3:
+        stage = synth::envelope::phase::release;
+        break;
+    }
+    [appd_ setEnvelopeStage:stage to:sender.doubleValue];
   }
 }
 

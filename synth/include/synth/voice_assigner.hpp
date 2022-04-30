@@ -19,6 +19,7 @@ public:
   double tick ();
 
   void set_wavetable (wavetable const *w);
+  void set_envelope (envelope::phase stage, double value);
 
 private:
   static constexpr auto unassigned = std::numeric_limits<unsigned>::max ();
@@ -27,7 +28,7 @@ private:
     voice v;
     unsigned note;
   };
-  std::array<vm, 4> voices_;
+  std::array<vm, 8> voices_;
   unsigned next_ = 0U;
 };
 

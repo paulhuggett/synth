@@ -34,6 +34,13 @@ void voice_assigner::set_wavetable (wavetable const *const w) {
   }
 }
 
+void voice_assigner::set_envelope (envelope::phase const stage,
+                                   double const value) {
+  for (auto &v : voices_) {
+    v.v.set_envelope (stage, value);
+  }
+}
+
 double voice_assigner::tick () {
   return std::accumulate (std::begin (voices_), std::end (voices_), 0.0,
                           [] (double acc, vm &v) {

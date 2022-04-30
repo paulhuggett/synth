@@ -27,19 +27,21 @@ public:
   using amplitude = wavetable::amplitude;
   using frequency = oscillator::frequency;
 
-  explicit constexpr voice (wavetable const* const NONNULL w)
+  explicit voice (wavetable const* const NONNULL w)
       : osc_{{oscillator{w}, oscillator{w}}} {}
 
   void note_on (unsigned const note);
   void note_off ();
 
+  bool active () const { return env_.active (); }
   void set_wavetable (wavetable const* const NONNULL w);
+  void set_envelope (envelope::phase stage, double value);
 
   amplitude tick ();
 
 private:
   std::array<oscillator, 2> osc_;
-  synth::envelope env_;
+  envelope env_;
 };
 
 }  // end namespace synth

@@ -2,8 +2,11 @@
 #define APP_DELEGATE_H
 
 #import <TargetConditionals.h>
+#include "synth/envelope.hpp"
 
 #if TARGET_OS_OSX
+
+enum EnvelopeStage { attack, decay, sustain, release };
 
 #import <Cocoa/Cocoa.h>
 @interface AppDelegate : NSObject <NSApplicationDelegate>
@@ -19,6 +22,7 @@
 
 - (void)setWaveform:(NSInteger)which;
 - (void)setFrequency:(double)f;
+- (void)setEnvelopeStage:(synth::envelope::phase)stage to:(double)value;
 
 @end
 
