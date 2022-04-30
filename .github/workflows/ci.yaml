@@ -20,17 +20,17 @@ jobs:
 
                     # iOS builds
                     # ~~~~~~~~~~~~
-                    - name: iOS/Xcode/Debug
-                      build_type: Debug
-                      options: -DCMAKE_SYSTEM_NAME=iOS
-                      generator: Xcode
-                      os: macos-latest
+#                    - name: iOS/Xcode/Debug
+#                      build_type: Debug
+#                      options: -DCMAKE_SYSTEM_NAME=iOS
+#                      generator: Xcode
+#                      os: macos-latest
 
-                    - name: iOS/Xcode/Release
-                      build_type: Release
-                      options: -DCMAKE_SYSTEM_NAME=iOS
-                      generator: Xcode
-                      os: macos-latest
+#                    - name: iOS/Xcode/Release
+#                      build_type: Release
+#                      options: -DCMAKE_SYSTEM_NAME=iOS
+#                      generator: Xcode
+#                      os: macos-latest
 
 
                     # Ubuntu builds
