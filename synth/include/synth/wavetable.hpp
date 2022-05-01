@@ -31,7 +31,7 @@ public:
   // wastes 2 of our precious bits. Instead, we should store just 32 fractional
   // bits with values biased by 1.0 to eliminate negatives and scale to [0,2^32]
   // to eliminate exact 1.0.
-  using amplitude = fixed<1U, 30U>;
+  using amplitude = fixed<32, 1>;
 
   /// \tparam Function  A function with signature equivalent to double(double).
   /// \param f A function f(θ) which will be invoked with θ from [0..2π).

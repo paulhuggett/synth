@@ -23,7 +23,7 @@ namespace synth {
 class oscillator {
 public:
   using amplitude = wavetable::amplitude;
-  using frequency = ufixed<25U, 7U>;
+  using frequency = ufixed<32, 25>;  // 32-bit unsigned fixed, UQ25.7.
   static_assert (std::is_same_v<frequency::value_type, uint32_t>);
   static_assert (mask_v<frequency::integral_bits> >= 20U * 1000U,
                  "Must be able to represent frequences up to 20kHz");
@@ -34,7 +34,7 @@ public:
 
   void set_wavetable (wavetable const* const NONNULL w) { w_ = w; }
   void set_frequency (frequency const f) {
-    increment_ = this->phase_increment (f);
+    increment_ = oscillator::phase_increment (f);
   }
 
   constexpr amplitude tick () {
@@ -54,7 +54,7 @@ private:
   /// r is the number of entries in a wavetable. Everything but f is constant
   /// and we'd like to eliminate the division, so rearrange to get f*(r/S).
   static inline constexpr auto C =
-      ufixed<0, M - frequency::fractional_bits - wavetable::N>::fromfp (
+      ufixed<M - frequency::fractional_bits - wavetable::N, 0>::fromfp (
           static_cast<double> (1U << wavetable::N) / sample_rate);
 
   /// When multiplying a UQa.b number by a UQc.d number, the result is
@@ -79,8 +79,7 @@ private:
   /// \return The phase accumulator control value to be used to obtain
   ///   frequency \p f.
   static constexpr uinteger_t<M> phase_increment (frequency const f) {
-    using incr_type =
-        ufixed<M - accumulator_fractional_bits, accumulator_fractional_bits>;
+    using incr_type = ufixed<M, M - accumulator_fractional_bits>;
     static_assert (incr_type::total_bits == M);
     static_assert (incr_type::integral_bits == wavetable::N);
 

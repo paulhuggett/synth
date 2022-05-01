@@ -24,12 +24,13 @@ struct mask<0U> {
 template <unsigned N>
 inline constexpr auto mask_v = mask<N>::value;
 
-template <unsigned IntegralBits, unsigned FractionalBits>
+template <unsigned TotalBits, unsigned IntegralBits,
+          typename = typename std::enable_if_t<TotalBits >= IntegralBits>>
 class fixed {
 public:
+  static inline constexpr auto total_bits = TotalBits;
   static inline constexpr auto integral_bits = IntegralBits;
-  static inline constexpr auto fractional_bits = FractionalBits;
-  static inline constexpr auto total_bits = 1U + IntegralBits + FractionalBits;
+  static inline constexpr auto fractional_bits = TotalBits - IntegralBits - 1U;
 
   using value_type = sinteger_t<total_bits>;
   constexpr fixed () = default;
@@ -84,18 +85,18 @@ inline std::ostream& operator<< (std::ostream& os,
   return os << fp.as_double ();
 }
 
-template <unsigned IntegralBits, unsigned FractionalBits>
+template <unsigned TotalBits, unsigned IntegralBits,
+          typename = typename std::enable_if_t<TotalBits >= IntegralBits>>
 class ufixed {
 public:
+  static inline constexpr auto total_bits = TotalBits;
   static inline constexpr auto integral_bits = IntegralBits;
-  static inline constexpr auto fractional_bits = FractionalBits;
-  static inline constexpr auto total_bits = integral_bits + fractional_bits;
+  static inline constexpr auto fractional_bits = total_bits - integral_bits;
 
   using value_type = uinteger_t<total_bits>;
 
   constexpr ufixed () = default;
   explicit constexpr ufixed (value_type const x) : x_{x} {}
-
   static constexpr auto fromfp (double const x) {
     assert (x >= 0.0);
     return ufixed{static_cast<value_type> (std::max (0.0, x) * mul_)};
@@ -107,7 +108,7 @@ public:
                                  uinteger_t<fractional_bits> const fractional) {
     assert ((integral & ~mask_v<integral_bits>) == 0U);
     assert ((fractional & ~mask_v<fractional_bits>) == 0U);
-    return fixed{static_cast<value_type> (
+    return ufixed{static_cast<value_type> (
         ((integral & mask_v<integral_bits>) << fractional_bits) |
         (fractional & mask_v<fractional_bits>))};
   }
