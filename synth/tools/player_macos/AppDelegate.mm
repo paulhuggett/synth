@@ -4,8 +4,8 @@
 
 #include "synth/voice_assigner.hpp"
 
-using SampleType = Float32;
-static constexpr UInt32 bufferSize = 0x1000;
+using SampleType = Float32;  // TODO: use fixed point.
+static constexpr UInt32 bufferSize = 128 * sizeof (SampleType);
 static constexpr auto numBuffers = 8U;
 static constexpr NSTimeInterval lockWaitTime = 1.0;
 
