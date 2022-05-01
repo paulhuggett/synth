@@ -130,10 +130,6 @@ static void stopAudio (AudioQueueRef queue) {
       // Status bytes are eight-bit binary numbers in which the Most Significant Bit (MSB) is set
       // (binary 1). Status bytes serve to identify the message type, that is, the purpose of the
       // Data bytes which follow it.
-      if ((message & 0x0b10000000) == 1U) {
-        NSLog (@"status byte");
-        continue;
-      }
       unsigned const chan = message & 0x0F;
       switch (message >> 4) {
         case 0b1000:  // Note-Off
