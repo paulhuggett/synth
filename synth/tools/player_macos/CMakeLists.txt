@@ -31,7 +31,7 @@ if (APPLE)
       Assets.xcassets
       ViewController.h
       ViewController.mm
-      player_macos.m
+      player_macos.mm
       macOS/player_macos.entitlements
       ${STORYBOARDS}
     )
@@ -88,7 +88,7 @@ if (APPLE)
       Assets.xcassets
       ViewController.h
       ViewController.mm
-      player_macos.m
+      player_macos.mm
       ${STORYBOARDS}
     )
     target_sources (player_ios PRIVATE
