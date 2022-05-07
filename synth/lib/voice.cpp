@@ -20,18 +20,24 @@ void voice::set_wavetable (wavetable const* const w) {
   }
 }
 
-void voice::set_envelope (envelope::phase stage, double value) {
+void voice::set_envelope (envelope::phase const stage, double const value) {
   env_.set (stage, value);
+}
+
+static inline double saturate (double const a) {
+  return std::min (std::max (a, -1.0), 1.0);
 }
 
 auto voice::tick () -> amplitude {
   if (!env_.active ()) {
     return amplitude::fromfp (0.0);
   }
-  double const a = std::accumulate (std::begin (osc_), std::end (osc_), 0.0,
-                                    [] (double const acc, oscillator& osc) {
-                                      return acc + osc.tick ().as_double ();
-                                    });
+  // Mix the output from the oscillators.
+  double const a =
+      std::accumulate (std::begin (osc_), std::end (osc_), 0.0,
+                       [] (double const acc, oscillator& osc) {
+                         return saturate (acc + osc.tick ().as_double ());
+                       });
   return env_.tick (amplitude::fromfp (a));
 }
 
