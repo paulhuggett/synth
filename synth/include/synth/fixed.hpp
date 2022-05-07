@@ -36,6 +36,9 @@ public:
   constexpr fixed () = default;
 
   static constexpr auto fromfp (double const x) {
+    // TODO: enable.
+    // assert (std::abs (x) < (uinteger_t<integral_bits + 1>{1} <<
+    // integral_bits));
     return fixed{static_cast<value_type> (x * mul_)};
   }
   static constexpr auto fromint (uinteger_t<integral_bits> const integral) {

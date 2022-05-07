@@ -4,8 +4,13 @@
 @interface ViewController () {
   AppDelegate *_Nullable appd_;
 
+#if TARGET_OS_OSX
   NSImage *activeImage_;
   NSImage *inactiveImage_;
+#elif TARGET_OS_IOS
+  UIImage *activeImage_;
+  UIImage *inactiveImage_;
+#endif
 }
 @end
 
@@ -20,15 +25,19 @@
   [super viewDidLoad];
 #if TARGET_OS_OSX
   appd_ = [[NSApplication sharedApplication] delegate];
-#elif TARGET_OS_IOS
-  appd_ = [[UIApplication sharedApplication] delegate];
-#endif
   activeImage_ = [NSImage imageNamed:NSImageNameStatusAvailable];
   inactiveImage_ = [NSImage imageNamed:NSImageNameStatusUnavailable];
-
   for (int segment = 0, lastSegment = voices.segmentCount; segment < lastSegment; ++segment) {
     [voices setImage:inactiveImage_ forSegment:segment];
   }
+#elif TARGET_OS_IOS
+  appd_ = static_cast<AppDelegate *> ([[UIApplication sharedApplication] delegate]);
+//  UIImageConfiguration activeConfiguration;
+//  activeImage_ = [UIImage systemImageNamed:@"circle.fill" withConfiguration:&activeConfiguration];
+//  UIImageConfiguration inactiveConfiguration;
+//  inactiveImage_ = [UIImage systemImageNamed:@"circle.fill"
+//  withConfiguration:&inactiveConfiguration];
+#endif
 }
 
 // set represented object
