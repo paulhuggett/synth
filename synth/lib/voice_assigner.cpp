@@ -5,7 +5,7 @@
 
 namespace synth {
 
-voice_assigner::vm::vm () : v{&sine}, note{unassigned} {}
+voice_assigner::vm::vm () : v{&triangle}, note{unassigned} {}
 
 void voice_assigner::note_on (unsigned const note) {
   if (voices_[next_].note != unassigned) {
