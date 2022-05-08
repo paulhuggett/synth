@@ -11,6 +11,7 @@
   UIImage *activeImage_;
   UIImage *inactiveImage_;
 #endif
+  UInt16 prevActive_;
 }
 @end
 
@@ -38,6 +39,29 @@
 //  inactiveImage_ = [UIImage systemImageNamed:@"circle.fill"
 //  withConfiguration:&inactiveConfiguration];
 #endif
+
+  prevActive_ = 0U;
+  [[NSRunLoop currentRunLoop]
+      addTimer:[[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSinceNow:1.0]
+                                        interval:0.1
+                                          target:self
+                                        selector:@selector (updateActiveVoices)
+                                        userInfo:nil
+                                         repeats:YES]
+       forMode:NSDefaultRunLoopMode];
+}
+
+- (void)updateActiveVoices {
+  UInt16 const active = [appd_ activeVoices];
+  if (active == prevActive_) {
+    return;
+  }
+  prevActive_ = active;
+  for (int segment = 0, lastSegment = voices.segmentCount; segment < lastSegment; ++segment) {
+    bool const isActive = (active & (1U << segment)) != 0;
+    NSImage *const image = isActive ? activeImage_ : inactiveImage_;
+    [voices setImage:image forSegment:segment];
+  }
 }
 
 // set represented object

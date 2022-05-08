@@ -746,7 +746,7 @@
                                 </textFieldCell>
                             </textField>
                             <segmentedControl verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6qo-yM-pO6">
-                                <rect key="frame" x="139" y="298" width="157" height="23"/>
+                                <rect key="frame" x="64" y="298" width="315" height="23"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <segmentedCell key="cell" borderStyle="border" alignment="left" tag="4" style="capsule" trackingMode="selectAny" id="Rhe-Mi-XSM">
                                     <font key="font" metaFont="system"/>
@@ -755,6 +755,10 @@
                                         <segment label="2" image="NSStatusAvailable" tag="1"/>
                                         <segment label="3" image="NSStatusAvailable"/>
                                         <segment label="4" image="NSStatusAvailable"/>
+                                        <segment label="5" image="NSStatusAvailable"/>
+                                        <segment label="6" image="NSStatusAvailable"/>
+                                        <segment label="7" image="NSStatusAvailable"/>
+                                        <segment label="8" image="NSStatusAvailable"/>
                                     </segments>
                                 </segmentedCell>
                             </segmentedControl>

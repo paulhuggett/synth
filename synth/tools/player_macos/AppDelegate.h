@@ -23,6 +23,7 @@ enum EnvelopeStage { attack, decay, sustain, release };
 - (void)setWaveform:(NSInteger)which;
 - (void)setFrequency:(double)f;
 - (void)setEnvelopeStage:(synth::envelope::phase)stage to:(double)value;
+- (UInt16)activeVoices;
 
 @end
 

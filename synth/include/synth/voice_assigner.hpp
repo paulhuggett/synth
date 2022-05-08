@@ -4,6 +4,7 @@
 
 #include <array>
 #include <limits>
+#include <numeric>
 
 #include "synth/voice.hpp"
 
@@ -20,6 +21,8 @@ public:
 
   void set_wavetable (wavetable const *w);
   void set_envelope (envelope::phase stage, double value);
+
+  uint16_t active_voices () const;
 
 private:
   static constexpr auto unassigned = std::numeric_limits<unsigned>::max ();

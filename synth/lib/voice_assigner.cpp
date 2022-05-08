@@ -28,6 +28,15 @@ void voice_assigner::note_off (unsigned const note) {
   }
 }
 
+uint16_t voice_assigner::active_voices () const {
+  auto result = uint16_t{0};
+  auto count = 0U;
+  for (vm const &v : voices_) {
+    result |= static_cast<uint16_t> (v.v.active ()) << count++;
+  }
+  return result;
+}
+
 void voice_assigner::set_wavetable (wavetable const *const w) {
   for (auto &v : voices_) {
     v.v.set_wavetable (w);

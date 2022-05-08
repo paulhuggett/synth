@@ -70,6 +70,10 @@ static void stopAudio (AudioQueueRef queue) {
   return self;
 }
 
+- (UInt16)activeVoices {
+  return voices_->active_voices ();
+}
+
 // show error
 // ~~~~~~~~~~
 - (void)showError:(OSStatus)erc {
@@ -401,7 +405,7 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
 }
 
 - (void)timerFired {
-  NSLog (@"Timer fired");
+  // NSLog (@"Timer fired");
 }
 
 // application did finish launching
