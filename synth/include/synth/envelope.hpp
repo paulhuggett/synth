@@ -18,7 +18,7 @@ public:
   bool active () const;
 
   // Set the bottom bit for time-based envelope phases (i.e. ADR).
-  static constexpr auto timed_phase_mask = uint8_t{0x01};
+  static constexpr auto timed_phase_mask = uint8_t{0b001};
   enum class phase : uint8_t {
     idle = 0b000,
     attack = 0b000 | timed_phase_mask,
