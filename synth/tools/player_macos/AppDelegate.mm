@@ -400,6 +400,10 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
   }
 }
 
+- (void)timerFired {
+  NSLog (@"Timer fired");
+}
+
 // application did finish launching
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #if TARGET_OS_OSX
@@ -447,6 +451,15 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
   if (erc == noErr) {
     erc = [self startMIDI];
   }
+
+  [[NSRunLoop currentRunLoop]
+      addTimer:[[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSinceNow:1.0]
+                                        interval:0.1
+                                          target:self
+                                        selector:@selector (timerFired)
+                                        userInfo:nil
+                                         repeats:YES]
+       forMode:NSDefaultRunLoopMode];
 
   if (erc != noErr) {
     [self showError:erc];
