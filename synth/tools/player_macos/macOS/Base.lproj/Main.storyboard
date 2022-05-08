@@ -745,10 +745,10 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <segmentedControl verticalHuggingPriority="750" fixedFrame="YES" springLoaded="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6qo-yM-pO6">
-                                <rect key="frame" x="136" y="298" width="161" height="24"/>
+                            <segmentedControl verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6qo-yM-pO6">
+                                <rect key="frame" x="139" y="298" width="157" height="23"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <segmentedCell key="cell" borderStyle="border" alignment="left" tag="4" style="separated" trackingMode="selectAny" id="Rhe-Mi-XSM">
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" tag="4" style="capsule" trackingMode="selectAny" id="Rhe-Mi-XSM">
                                     <font key="font" metaFont="system"/>
                                     <segments>
                                         <segment label="1" alignment="left" image="NSStatusAvailable"/>
@@ -849,7 +849,7 @@
                                         <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="jjs-3A-9BX">
                                             <rect key="frame" x="133" y="14" width="24" height="106"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <sliderCell key="cell" continuous="YES" alignment="left" maxValue="1" tickMarkPosition="right" numberOfTickMarks="10" sliderType="linear" id="8ex-NO-8ag"/>
+                                            <sliderCell key="cell" continuous="YES" alignment="left" maxValue="1" doubleValue="1" tickMarkPosition="right" numberOfTickMarks="10" sliderType="linear" id="8ex-NO-8ag"/>
                                             <connections>
                                                 <action selector="adsrAction:" target="XfG-lQ-9wD" id="Xgr-J2-Khk"/>
                                             </connections>
@@ -866,7 +866,7 @@
                                         <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="F9g-qg-qjS">
                                             <rect key="frame" x="185" y="14" width="24" height="106"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <sliderCell key="cell" continuous="YES" alignment="left" maxValue="0.5" tickMarkPosition="right" numberOfTickMarks="10" sliderType="linear" id="dUN-I7-SNs"/>
+                                            <sliderCell key="cell" continuous="YES" alignment="left" maxValue="2" tickMarkPosition="right" numberOfTickMarks="10" sliderType="linear" id="dUN-I7-SNs"/>
                                             <connections>
                                                 <action selector="adsrAction:" target="XfG-lQ-9wD" id="dkA-fy-tgl"/>
                                             </connections>

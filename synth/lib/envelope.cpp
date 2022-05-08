@@ -1,6 +1,8 @@
 // -*- mode: c++; coding: utf-8-unix; -*-
 #include "synth/envelope.hpp"
 
+#include <type_traits>
+
 namespace synth {
 
 void envelope::note_on () { phase_ = phase::attack; }
@@ -11,30 +13,47 @@ void envelope::note_off () {
 
 bool envelope::active () const { return phase_ != phase::idle; }
 
-void envelope::set (phase p, double value) {
-  if (!std::isfinite (value)) {
+void envelope::set (phase p, double v) {
+  if (!std::isfinite (v)) {
     return;
   }
-  value = std::max (value, 0.0);
-  auto const delta_value = [] (double const v) {
-    return v > 0.0 ? 1.0 / (v * oscillator::sample_rate) : 0.0;
-  };
+  v = std::max (v, 0.0);
+  if (static_cast<std::underlying_type_t<decltype (p)>> (p) &
+      timed_phase_mask) {
+    v = v > 0.0 ? 1.0 / (v * synth::oscillator::sample_rate) : 0.0;
+  }
   switch (p) {
     case phase::idle:
       break;
     case phase::attack:
-      attack_ = delta_value (value);
+      attack_ = v;
       break;
     case phase::decay:
-      decay_ = delta_value (value);
-      break;
-    case phase::release:
-      release_ = delta_value (value);
+      decay_ = v;
       break;
     case phase::sustain:
-      sustain_ = std::min (1.0, value);
+      sustain_ = std::min (v, 1.0);
+      break;
+    case phase::release:
+      release_ = v;
       break;
   }
+}
+
+char const* NONNULL envelope::phase_name (phase const p) noexcept {
+  switch (p) {
+    case phase::idle:
+      return "idle";
+    case phase::sustain:
+      return "sustain";
+    case phase::attack:
+      return "attack";
+    case phase::decay:
+      return "decay";
+    case phase::release:
+      return "release";
+  }
+  return "";
 }
 
 auto envelope::tick (amplitude const v) -> amplitude {

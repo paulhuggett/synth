@@ -3,6 +3,7 @@
 #define SYNTH_ENVELOPE_HPP
 
 #include <cmath>
+#include <cstdint>
 
 #include "nco.hpp"
 
@@ -16,11 +17,20 @@ public:
   void note_off ();
   bool active () const;
 
-  enum class phase { idle, attack, decay, sustain, release };
+  // Set the bottom bit for time-based envelope phases (i.e. ADR).
+  static constexpr auto timed_phase_mask = uint8_t{0x01};
+  enum class phase : uint8_t {
+    idle = 0b000,
+    attack = 0b000 | timed_phase_mask,
+    decay = 0b010 | timed_phase_mask,
+    sustain = 0b010,
+    release = 0b100 | timed_phase_mask,
+  };
+  static char const* NONNULL phase_name (phase p) noexcept;
 
-  void set (phase p, double value);
+  void set (phase p, double v);
 
-  amplitude tick (amplitude const v);
+  amplitude tick (amplitude v);
 
 private:
   double attack_ = 0.0;

@@ -542,8 +542,7 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
 }
 
 - (void)setEnvelopeStage:(synth::envelope::phase)stage to:(double)value {
-  NSString *names[5] = {@"idle", @"attack", @"decay", @"sustain", @"release"};
-  NSLog (@"Envelope %@ %f", names[static_cast<int> (stage)], value);
+  NSLog (@"Envelope %@ %f", @(synth::envelope::phase_name (stage)), value);
 
   if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     NSLog (@"setEnvelopeStage:to: could not obtain the lock in a reasonable time!");
