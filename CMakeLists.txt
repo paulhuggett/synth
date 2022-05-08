@@ -53,6 +53,8 @@ if (NOT SYSTEM_IS_IOS)
   add_subdirectory (gentable)
   add_subdirectory (scsynth)
 endif ()
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory (googletest)
 add_subdirectory (unittests)
 add_subdirectory (synth)
