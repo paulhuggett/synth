@@ -70,8 +70,15 @@ static void stopAudio (AudioQueueRef queue) {
   return self;
 }
 
+// active voices
+// ~~~~~~~~~~~~~
 - (UInt16)activeVoices {
-  return voices_->active_voices ();
+  UInt16 result = 0;
+  if ([self->lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
+    result = voices_->active_voices ();
+    [self->lock_ unlock];
+  }
+  return result;
 }
 
 // show error

@@ -58,8 +58,7 @@
   }
   prevActive_ = active;
   for (int segment = 0, lastSegment = voices.segmentCount; segment < lastSegment; ++segment) {
-    bool const isActive = (active & (1U << segment)) != 0;
-    NSImage *const image = isActive ? activeImage_ : inactiveImage_;
+    NSImage *const image = (active & (1U << segment)) != 0 ? activeImage_ : inactiveImage_;
     [voices setImage:image forSegment:segment];
   }
 }

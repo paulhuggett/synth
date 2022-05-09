@@ -23,6 +23,9 @@ enum EnvelopeStage { attack, decay, sustain, release };
 - (void)setWaveform:(NSInteger)which;
 - (void)setFrequency:(double)f;
 - (void)setEnvelopeStage:(synth::envelope::phase)stage to:(double)value;
+
+/// Returns a bitmask which describes the active voices at the time of being called. Bit 0 (LSB)
+/// corresponds to the first voice, bit 1 to the second, and so on.
 - (UInt16)activeVoices;
 
 @end
