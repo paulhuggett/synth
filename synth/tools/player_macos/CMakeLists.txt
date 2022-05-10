@@ -50,20 +50,6 @@ if (APPLE)
       -Wno-direct-ivar-access
     )
 
-    set (test_target test_synth)
-    set (OUT_XML "${CMAKE_BINARY_DIR}/${test_target}.xml")
-    set (command_line "$<TARGET_FILE:${test_target}>" "--gtest_output=xml:${OUT_XML}")
-    add_custom_command (
-      TARGET player_macos
-      PRE_LINK
-      COMMAND ${command_line}
-      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-      COMMENT "Running ${test_target}"
-      DEPENDS ${test_target}
-      BYPRODUCTS ${OUT_XML}
-      VERBATIM
-    )
-
   endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 
