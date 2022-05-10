@@ -20,7 +20,8 @@
 
 namespace synth {
 
-class oscillator {
+template <unsigned SampleRate>
+class basic_oscillator {
 public:
   using amplitude = wavetable::amplitude;
   using frequency = ufixed<32, 25>;  // 32-bit unsigned fixed, UQ25.7.
@@ -28,13 +29,14 @@ public:
   static_assert (mask_v<frequency::integral_bits> >= 20U * 1000U,
                  "Must be able to represent frequences up to 20kHz");
 
-  static inline constexpr const auto sample_rate = 48000U;
+  static inline constexpr const auto sample_rate = SampleRate;
 
-  constexpr explicit oscillator (wavetable const* const NONNULL w) : w_{w} {}
+  constexpr explicit basic_oscillator (wavetable const* const NONNULL w)
+      : w_{w} {}
 
   void set_wavetable (wavetable const* const NONNULL w) { w_ = w; }
   void set_frequency (frequency const f) {
-    increment_ = oscillator::phase_increment (f);
+    increment_ = basic_oscillator::phase_increment (f);
   }
 
   constexpr amplitude tick () {
@@ -45,10 +47,6 @@ private:
   /// Phase accumulation is performed in an M-bit integer register.
   static inline constexpr auto M = 32U;
   static_assert (M >= wavetable::N);
-
-  wavetable const* NONNULL w_;
-  uinteger_t<M> increment_ = 0U;
-  uinteger_t<M> phase_ = 0U;
 
   /// phase_increment() wants to compute f/(S*r) where S is the sample rate and
   /// r is the number of entries in a wavetable. Everything but f is constant
@@ -64,12 +62,20 @@ private:
   static inline constexpr auto accumulator_fractional_bits =
       frequency::fractional_bits + decltype (C)::fractional_bits;
 
+  using increment_type = ufixed<M, M - accumulator_fractional_bits>;
+  static_assert (increment_type::total_bits == M);
+  static_assert (increment_type::integral_bits == wavetable::N);
+
+  wavetable const* NONNULL w_;
+  increment_type increment_;
+  uinteger_t<M> phase_ = 0U;
+
   constexpr uinteger_t<wavetable::N> phase_accumulator () {
     // The most significant (wavetable::N) bits of the phase accumulator output
     // provide the index into the lookup table.
     auto const result = static_cast<uinteger_t<wavetable::N>> (
         (phase_ >> accumulator_fractional_bits) & mask_v<wavetable::N>);
-    phase_ += increment_;
+    phase_ += increment_.get ();
     return result;
   }
 
@@ -78,14 +84,12 @@ private:
   /// \param f  The frequency to be used expressed as a fixed-point number.
   /// \return The phase accumulator control value to be used to obtain
   ///   frequency \p f.
-  static constexpr uinteger_t<M> phase_increment (frequency const f) {
-    using incr_type = ufixed<M, M - accumulator_fractional_bits>;
-    static_assert (incr_type::total_bits == M);
-    static_assert (incr_type::integral_bits == wavetable::N);
-
-    return incr_type{f.get () * C.get ()}.get ();
+  static constexpr increment_type phase_increment (frequency const f) {
+    return increment_type{f.get () * C.get ()};
   }
 };
+
+using oscillator = basic_oscillator<48000U>;
 
 }  // end namespace synth
 
