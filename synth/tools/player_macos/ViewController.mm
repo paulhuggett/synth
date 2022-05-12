@@ -102,19 +102,20 @@
 // Called when the value of one of the envelope sliders is changed.
 - (IBAction)adsrAction:(NSSlider *)sender {
   if (appd_ != nil) {
-    auto stage = synth::envelope::phase::idle;
+    using phase = synth::envelope<sample_rate>::phase;
+    auto stage = phase::idle;
     switch (sender.tag) {
       case 0:
-        stage = synth::envelope::phase::attack;
+        stage = phase::attack;
         break;
       case 1:
-        stage = synth::envelope::phase::decay;
+        stage = phase::decay;
         break;
       case 2:
-        stage = synth::envelope::phase::sustain;
+        stage = phase::sustain;
         break;
       case 3:
-        stage = synth::envelope::phase::release;
+        stage = phase::release;
         break;
     }
     [appd_ setEnvelopeStage:stage to:sender.doubleValue];

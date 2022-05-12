@@ -4,6 +4,8 @@
 #import <TargetConditionals.h>
 #include "synth/envelope.hpp"
 
+inline constexpr auto sample_rate = 48000U;
+
 #if TARGET_OS_OSX
 
 enum EnvelopeStage { attack, decay, sustain, release };
@@ -22,7 +24,7 @@ enum EnvelopeStage { attack, decay, sustain, release };
 
 - (void)setWaveform:(NSInteger)which;
 - (void)setFrequency:(double)f;
-- (void)setEnvelopeStage:(synth::envelope::phase)stage to:(double)value;
+- (void)setEnvelopeStage:(synth::envelope<sample_rate>::phase)stage to:(double)value;
 
 /// Returns a bitmask which describes the active voices at the time of being called. Bit 0 (LSB)
 /// corresponds to the first voice, bit 1 to the second, and so on.

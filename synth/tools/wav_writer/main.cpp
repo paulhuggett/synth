@@ -18,14 +18,13 @@ using namespace synth;
 
 namespace {
 
-void dump_wavetable (wavetable const &w) {
+template <typename Traits>
+void dump_wavetable (wavetable<Traits> const &w) {
   std::ostream &os = std::cout;
   os << std::hex;
   std::copy (std::begin (w), std::end (w),
-             std::ostream_iterator<wavetable::amplitude> (os, "\n"));
+             std::ostream_iterator<amplitude> (os, "\n"));
 }
-
-using frequency = oscillator::frequency;
 
 constexpr auto c4 = 60U;  // (middle C)
 std::array<frequency, 8> const c_major{{
@@ -39,22 +38,25 @@ std::array<frequency, 8> const c_major{{
     frequency::fromfp (midi_note_to_frequency (c4 + 12U)),  // C5
 }};
 
+constexpr auto sample_rate = 48000U;
+using oscillator_type = oscillator<sample_rate, osc_traits>;
+
 class oscillator_double {
 public:
-  explicit constexpr oscillator_double (oscillator *const osc) : osc_{osc} {}
+  explicit constexpr oscillator_double (oscillator_type *const osc)
+      : osc_{osc} {}
   double operator() () { return osc_->tick ().as_double (); }
 
 private:
-  oscillator *const osc_;
+  oscillator_type *const osc_;
 };
 
-constexpr auto sample_rate = oscillator::sample_rate;
 constexpr auto one_second = sample_rate;
 constexpr auto quarter_second = sample_rate / size_t{4};
 
 // A exponential chirp from 20Hz to 10kHz.
 void chirp (std::vector<double> *const samples) {
-  oscillator osc{&sine};
+  oscillator_type osc{&sine<osc_traits>};
   oscillator_double oscd{&osc};
 
   constexpr auto duration = one_second * 2;
@@ -75,13 +77,13 @@ int main () {
   std::vector<double> samples;
 
   if constexpr (/* DISABLES CODE */ (false)) {
-    dump_wavetable (sine);
+    dump_wavetable (sine<osc_traits>);
   }
 
   if constexpr (/* DISABLES CODE */ (false)) {
     // Play a 440Hz tone for 2 seconds
     constexpr auto two_seconds = one_second * 2;
-    oscillator osc{&sine};
+    oscillator_type osc{&sine<osc_traits>};
     osc.set_frequency (frequency::fromfp (440.0));
     samples.reserve (two_seconds);
     std::generate_n (std::back_inserter (samples), two_seconds,
@@ -90,7 +92,7 @@ int main () {
 
   if constexpr ((true)) {
     // Play a scale of C major using a collection of voices.
-    synth::voice_assigner voices;
+    synth::voice_assigner<sample_rate, osc_traits> voices;
     std::array<unsigned const, 8> const major_scale{
         {0U, 2U, 4U, 5U, 7U, 9U, 11U, 12U}};
 
@@ -111,7 +113,7 @@ int main () {
 
   if constexpr (/* DISABLES CODE */ (false)) {
     // Play a scale of C major on a single oscillator
-    oscillator osc{&sine};
+    oscillator_type osc{&sine<osc_traits>};
     for (auto const f : c_major) {
       osc.set_frequency (f);
       std::generate_n (std::back_inserter (samples), quarter_second,
@@ -121,8 +123,8 @@ int main () {
 
   if constexpr (/* DISABLES CODE */ (false)) {
     // Play a scale of C major using two slightly detuned oscillators.
-    oscillator osc1{&sine};
-    oscillator osc2{&sine};
+    oscillator_type osc1{&sine<osc_traits>};
+    oscillator_type osc2{&sine<osc_traits>};
     for (auto const f : c_major) {
       static constexpr auto detune = frequency::fromfp (4.0);
       osc1.set_frequency (f);
@@ -135,12 +137,12 @@ int main () {
 
   if constexpr (/* DISABLES CODE */ (false)) {
     static constexpr auto two_seconds = sample_rate * 2U;
-    oscillator osc{&sine};
+    oscillator_type osc{&sine<osc_traits>};
     osc.set_frequency (frequency::fromfp (440.0));
-    osc.set_wavetable (&sawtooth);
+    osc.set_wavetable (&sawtooth<osc_traits>);
     std::generate_n (std::back_inserter (samples), two_seconds,
                      oscillator_double{&osc});
-    osc.set_wavetable (&square);
+    osc.set_wavetable (&square<osc_traits>);
     std::generate_n (std::back_inserter (samples), two_seconds,
                      oscillator_double{&osc});
   }

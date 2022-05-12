@@ -10,6 +10,7 @@
 
 namespace synth {
 
+template <unsigned SampleRate, typename Traits>
 class voice_assigner {
 public:
   voice_assigner () = default;
@@ -19,21 +20,91 @@ public:
 
   double tick ();
 
-  void set_wavetable (wavetable const *w);
-  void set_envelope (envelope::phase stage, double value);
+  void set_wavetable (wavetable<Traits> const *w);
+  void set_envelope (typename envelope<SampleRate>::phase stage, double value);
 
   uint16_t active_voices () const;
 
 private:
   static constexpr auto unassigned = std::numeric_limits<unsigned>::max ();
   struct vm {
-    vm ();
-    voice v;
+    vm () : v{&triangle<Traits>}, note{unassigned} {}
+    voice<SampleRate, Traits> v;
     unsigned note;
   };
   std::array<vm, 8> voices_;
   unsigned next_ = 0U;
 };
+
+// note on
+// ~~~~~~~
+template <unsigned SampleRate, typename Traits>
+void voice_assigner<SampleRate, Traits>::note_on (unsigned const note) {
+  if (voices_[next_].note != unassigned) {
+    voices_[next_].v.note_off ();
+  }
+  voices_[next_].note = note;
+  voices_[next_].v.note_on (note);
+  ++next_;
+  if (next_ >= voices_.size ()) {
+    next_ = 0U;
+  }
+}
+
+// note off
+// ~~~~~~~~
+template <unsigned SampleRate, typename Traits>
+void voice_assigner<SampleRate, Traits>::note_off (unsigned const note) {
+  for (auto &v : voices_) {
+    if (v.note == note) {
+      v.v.note_off ();
+      v.note = unassigned;
+    }
+  }
+}
+
+// active voices
+// ~~~~~~~~~~~~~
+template <unsigned SampleRate, typename Traits>
+uint16_t voice_assigner<SampleRate, Traits>::active_voices () const {
+  auto result = uint16_t{0};
+  auto count = 0U;
+  for (vm const &v : voices_) {
+    result |= static_cast<uint16_t> (v.v.active ()) << count++;
+  }
+  return result;
+}
+
+// set wavetable
+// ~~~~~~~~~~~~~
+template <unsigned SampleRate, typename Traits>
+void voice_assigner<SampleRate, Traits>::set_wavetable (
+    wavetable<Traits> const *const w) {
+  for (auto &v : voices_) {
+    v.v.set_wavetable (w);
+  }
+}
+
+// set envelope
+// ~~~~~~~~~~~~
+template <unsigned SampleRate, typename Traits>
+void voice_assigner<SampleRate, Traits>::set_envelope (
+    typename envelope<SampleRate>::phase const stage, double const value) {
+  for (auto &v : voices_) {
+    v.v.set_envelope (stage, value);
+  }
+}
+
+// tick
+// ~~~~
+template <unsigned SampleRate, typename Traits>
+double voice_assigner<SampleRate, Traits>::tick () {
+  return std::accumulate (std::begin (voices_), std::end (voices_), 0.0,
+                          [] (double acc, vm &v) {
+                            return acc + v.v.tick ().as_double ();
+                          }) /
+         voices_.size ();
+}
 
 }  // end namespace synth
 

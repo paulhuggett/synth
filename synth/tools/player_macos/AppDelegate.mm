@@ -16,7 +16,7 @@ static constexpr NSTimeInterval lockWaitTime = 1.0;
 // ~~~~~~~~~~~~~~~~~
 static AudioStreamBasicDescription audioDescription (void) {
   AudioStreamBasicDescription d = {0};
-  d.mSampleRate = static_cast<Float64> (synth::oscillator::sample_rate);
+  d.mSampleRate = static_cast<Float64> (sample_rate);
   d.mFormatID = kAudioFormatLinearPCM;
   d.mFormatFlags = kLinearPCMFormatFlagIsFloat;
   d.mBytesPerPacket = UInt32{sizeof (SampleType)};
@@ -45,7 +45,7 @@ static void stopAudio (AudioQueueRef queue) {
   AudioQueueBufferRef *buffers_;
   NSLock *lock_;
 
-  std::unique_ptr<synth::voice_assigner> voices_;
+  std::unique_ptr<synth::voice_assigner<sample_rate, synth::osc_traits>> voices_;
   MIDIPortRef port_;
   MIDIEndpointRef source_;
 }
@@ -62,7 +62,7 @@ static void stopAudio (AudioQueueRef queue) {
     queue_ = nil;
     buffers_ = nil;
     lock_ = [NSLock new];
-    voices_.reset (new synth::voice_assigner);
+    voices_.reset (new synth::voice_assigner<sample_rate, synth::osc_traits>);
     //    osc_->set_frequency (synth::oscillator::frequency::fromfp (440.0));
     port_ = 0;
     source_ = 0;
@@ -519,24 +519,24 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
 // set waveform
 // ~~~~~~~~~~~~
 - (void)setWaveform:(NSInteger)tag {
-  synth::wavetable const *w = nullptr;
+  synth::wavetable<synth::osc_traits> const *w = nullptr;
   NSString *name = @"";
   switch (tag) {
     case 0:
       name = @"sine";
-      w = &synth::sine;
+      w = &synth::sine<synth::osc_traits>;
       break;
     case 1:
       name = @"square";
-      w = &synth::square;
+      w = &synth::square<synth::osc_traits>;
       break;
     case 2:
       name = @"triangle";
-      w = &synth::triangle;
+      w = &synth::triangle<synth::osc_traits>;
       break;
     case 3:
       name = @"sawtooth=";
-      w = &synth::sawtooth;
+      w = &synth::sawtooth<synth::osc_traits>;
       break;
   }
   if (w == nullptr) {
@@ -565,8 +565,8 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
   [lock_ unlock];
 }
 
-- (void)setEnvelopeStage:(synth::envelope::phase)stage to:(double)value {
-  NSLog (@"Envelope %@ %f", @(synth::envelope::phase_name (stage)), value);
+- (void)setEnvelopeStage:(synth::envelope<sample_rate>::phase)stage to:(double)value {
+  NSLog (@"Envelope %@ %f", @(synth::envelope<sample_rate>::phase_name (stage)), value);
 
   if (![lock_ lockBeforeDate:[NSDate dateWithTimeIntervalSinceNow:lockWaitTime]]) {
     NSLog (@"setEnvelopeStage:to: could not obtain the lock in a reasonable time!");

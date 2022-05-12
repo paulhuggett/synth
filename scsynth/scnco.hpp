@@ -103,9 +103,6 @@ private:
   ///   frequency \p f.
   static sc_ufixed<M, M - accumulator_fractional_bits> phase_increment (
       frequency const f) {
-    // using incr_type = ufixed<M - accumulator_fractional_bits,
-    // accumulator_fractional_bits>; static_assert (incr_type::total_bits == M);
-    // static_assert (incr_type::integral_bits == sine_wavetable::N);
     return f * C;
   }
 };
