@@ -9,10 +9,7 @@ add_library (synth STATIC
   "${SYNTH_INCLUDES}/synth/voice_assigner.hpp"
   "${SYNTH_INCLUDES}/synth/wavetable.hpp"
 
-  envelope.cpp
-  voice.cpp
-  voice_assigner.cpp
-  wavetable.cpp
+  "${CMAKE_CURRENT_SOURCE_DIR}/empty.cpp"
 )
 target_include_directories (synth PUBLIC "${SYNTH_INCLUDES}")
 setup_target (synth)
