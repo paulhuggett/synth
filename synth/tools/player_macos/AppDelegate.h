@@ -8,8 +8,6 @@ inline constexpr auto sample_rate = 48000U;
 
 #if TARGET_OS_OSX
 
-enum EnvelopeStage { attack, decay, sustain, release };
-
 #import <Cocoa/Cocoa.h>
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 
