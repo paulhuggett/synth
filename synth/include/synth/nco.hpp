@@ -45,19 +45,15 @@ private:
       ufixed<Traits::C_fractional_bits, 0>::fromfp (
           static_cast<double> (1U << Traits::wavetable_N) / sample_rate);
 
-  using increment_type = typename Traits::increment_type;
+  using phase_index_type = typename Traits::phase_index_type;
 
   wavetable<Traits> const* NONNULL w_;
-  increment_type increment_;
-  uinteger_t<Traits::M> phase_ = 0U;
+  phase_index_type increment_;
+  phase_index_type phase_;
 
-  constexpr uinteger_t<Traits::wavetable_N> phase_accumulator () {
-    // The most significant (wavetable::N) bits of the phase accumulator output
-    // provide the index into the lookup table.
-    auto const result = static_cast<uinteger_t<Traits::wavetable_N>> (
-        (phase_ >> Traits::accumulator_fractional_bits) &
-        mask_v<Traits::wavetable_N>);
-    phase_ += increment_.get ();
+  constexpr phase_index_type phase_accumulator () {
+    auto const result = phase_;
+    phase_ = phase_index_type{phase_.get () + increment_.get ()};
     return result;
   }
 
@@ -66,14 +62,14 @@ private:
   /// \param f  The frequency to be used expressed as a fixed-point number.
   /// \return The phase accumulator control value to be used to obtain
   ///   frequency \p f.
-  static constexpr increment_type phase_increment (frequency const f) {
+  static constexpr phase_index_type phase_increment (frequency const f) {
     // '>=' here because we don't care if f+C overflows.
     static_assert (decltype (f)::integral_bits + decltype (C)::integral_bits >=
-                   increment_type::integral_bits);
+                   phase_index_type::integral_bits);
     static_assert (decltype (f)::fractional_bits +
                        decltype (C)::fractional_bits ==
-                   increment_type::fractional_bits);
-    return increment_type{f.get () * C.get ()};
+                   phase_index_type::fractional_bits);
+    return phase_index_type{f.get () * C.get ()};
   }
 };
 

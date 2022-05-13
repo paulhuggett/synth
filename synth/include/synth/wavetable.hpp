@@ -30,9 +30,7 @@ static_assert (mask_v<frequency::integral_bits> >= 20U * 1000U,
                "Must be able to represent frequences up to 20kHz");
 
 // TODO: we're currently storing ±(1+1/2^30) which we don't really need and
-// wastes 2 of our precious bits. Instead, we should store just 32 fractional
-// bits with values biased by 1.0 to eliminate negatives and scale to [0,2^32]
-// to eliminate exact 1.0.
+// some of our precious bits.
 using amplitude = fixed<32, 1>;
 
 struct osc_traits {
@@ -43,6 +41,8 @@ struct osc_traits {
   static inline constexpr auto M = 32U;
   static_assert (M >= wavetable_N);
 
+  // The number of fractional bits for the constant multiplication factor used
+  // by the oscillator's phase accumulator.
   static inline constexpr auto C_fractional_bits =
       M - frequency::fractional_bits - wavetable_N;
 
@@ -53,9 +53,9 @@ struct osc_traits {
   static inline constexpr auto accumulator_fractional_bits =
       frequency::fractional_bits + C_fractional_bits;
 
-  using increment_type = ufixed<M, M - accumulator_fractional_bits>;
-  static_assert (increment_type::total_bits == M);
-  static_assert (increment_type::integral_bits == wavetable_N);
+  using phase_index_type = ufixed<M, M - accumulator_fractional_bits>;
+  static_assert (phase_index_type::total_bits == M);
+  static_assert (phase_index_type::integral_bits == wavetable_N);
 };
 
 template <typename Traits>
@@ -76,9 +76,15 @@ public:
   }
 
   constexpr amplitude phase_to_amplitude (
-      uinteger_t<N> const phase) const noexcept {
-    assert (phase < table_size_);
-    return y_[phase];
+      typename Traits::phase_index_type const phase) const noexcept {
+    // The most significant (wavetable_N) bits of the phase accumulator output
+    // provide the index into the lookup table.
+    auto const index = static_cast<uinteger_t<Traits::wavetable_N>> (
+        (phase.get () >> Traits::accumulator_fractional_bits) &
+        mask_v<Traits::wavetable_N>);
+
+    assert (index < table_size_);
+    return y_[index];
   }
 
   constexpr auto begin () const { return std::begin (y_); }
