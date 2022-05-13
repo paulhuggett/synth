@@ -42,10 +42,10 @@ private:
   /// r is the number of entries in a wavetable. Everything but f is constant
   /// and we'd like to eliminate the division, so rearrange to get f*(r/S).
   static inline constexpr auto C =
-      ufixed<Traits::C_fractional_bits, 0>::fromfp (
+      ufixed<oscillator_info<Traits>::C_fractional_bits, 0>::fromfp (
           static_cast<double> (1U << Traits::wavetable_N) / sample_rate);
 
-  using phase_index_type = typename Traits::phase_index_type;
+  using phase_index_type = typename oscillator_info<Traits>::phase_index_type;
 
   wavetable<Traits> const* NONNULL w_;
   phase_index_type increment_;

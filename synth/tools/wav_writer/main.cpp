@@ -39,7 +39,7 @@ std::array<frequency, 8> const c_major{{
 }};
 
 constexpr auto sample_rate = 48000U;
-using oscillator_type = oscillator<sample_rate, osc_traits>;
+using oscillator_type = oscillator<sample_rate, nco_traits>;
 
 class oscillator_double {
 public:
@@ -56,7 +56,7 @@ constexpr auto quarter_second = sample_rate / size_t{4};
 
 // A exponential chirp from 20Hz to 10kHz.
 void chirp (std::vector<double> *const samples) {
-  oscillator_type osc{&sine<osc_traits>};
+  oscillator_type osc{&sine<nco_traits>};
   oscillator_double oscd{&osc};
 
   constexpr auto duration = one_second * 2;
@@ -77,13 +77,13 @@ int main () {
   std::vector<double> samples;
 
   if constexpr (/* DISABLES CODE */ (false)) {
-    dump_wavetable (sine<osc_traits>);
+    dump_wavetable (sine<nco_traits>);
   }
 
   if constexpr (/* DISABLES CODE */ (false)) {
     // Play a 440Hz tone for 2 seconds
     constexpr auto two_seconds = one_second * 2;
-    oscillator_type osc{&sine<osc_traits>};
+    oscillator_type osc{&sine<nco_traits>};
     osc.set_frequency (frequency::fromfp (440.0));
     samples.reserve (two_seconds);
     std::generate_n (std::back_inserter (samples), two_seconds,
@@ -92,7 +92,7 @@ int main () {
 
   if constexpr ((true)) {
     // Play a scale of C major using a collection of voices.
-    synth::voice_assigner<sample_rate, osc_traits> voices;
+    synth::voice_assigner<sample_rate, nco_traits> voices;
     std::array<unsigned const, 8> const major_scale{
         {0U, 2U, 4U, 5U, 7U, 9U, 11U, 12U}};
 
@@ -113,7 +113,7 @@ int main () {
 
   if constexpr (/* DISABLES CODE */ (false)) {
     // Play a scale of C major on a single oscillator
-    oscillator_type osc{&sine<osc_traits>};
+    oscillator_type osc{&sine<nco_traits>};
     for (auto const f : c_major) {
       osc.set_frequency (f);
       std::generate_n (std::back_inserter (samples), quarter_second,
@@ -123,8 +123,8 @@ int main () {
 
   if constexpr (/* DISABLES CODE */ (false)) {
     // Play a scale of C major using two slightly detuned oscillators.
-    oscillator_type osc1{&sine<osc_traits>};
-    oscillator_type osc2{&sine<osc_traits>};
+    oscillator_type osc1{&sine<nco_traits>};
+    oscillator_type osc2{&sine<nco_traits>};
     for (auto const f : c_major) {
       static constexpr auto detune = frequency::fromfp (4.0);
       osc1.set_frequency (f);
@@ -137,12 +137,12 @@ int main () {
 
   if constexpr (/* DISABLES CODE */ (false)) {
     static constexpr auto two_seconds = sample_rate * 2U;
-    oscillator_type osc{&sine<osc_traits>};
+    oscillator_type osc{&sine<nco_traits>};
     osc.set_frequency (frequency::fromfp (440.0));
-    osc.set_wavetable (&sawtooth<osc_traits>);
+    osc.set_wavetable (&sawtooth<nco_traits>);
     std::generate_n (std::back_inserter (samples), two_seconds,
                      oscillator_double{&osc});
-    osc.set_wavetable (&square<osc_traits>);
+    osc.set_wavetable (&square<nco_traits>);
     std::generate_n (std::back_inserter (samples), two_seconds,
                      oscillator_double{&osc});
   }

@@ -12,14 +12,15 @@ class Oscillator : public testing::Test {
 public:
   static constexpr auto sample_rate = 16384U;  // Must be a power of two.
 
-  wavetable<osc_traits> wt_{sawtooth<osc_traits>};
-  oscillator<sample_rate, osc_traits> osc_{&wt_};
+  wavetable<nco_traits> wt_{sawtooth<nco_traits>};
+  oscillator<sample_rate, nco_traits> osc_{&wt_};
 
   std::vector<amplitude> make_samples (unsigned cycle_length);
 };
 
 auto Oscillator::make_samples (unsigned cycle_length)
     -> std::vector<amplitude> {
+  assert (sample_rate % cycle_length == 0U);
   osc_.set_frequency (frequency::fromint (sample_rate / cycle_length));
 
   std::vector<amplitude> samples;

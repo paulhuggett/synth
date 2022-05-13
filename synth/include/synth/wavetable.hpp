@@ -33,18 +33,24 @@ static_assert (mask_v<frequency::integral_bits> >= 20U * 1000U,
 // some of our precious bits.
 using amplitude = fixed<32, 1>;
 
-struct osc_traits {
-  // The number of entries in a wavetable is 2^N.
+struct nco_traits {
+  /// The number of entries in a wavetable is 2^wavetable_N.
   static inline constexpr auto wavetable_N = 11U;
 
   /// Phase accumulation is performed in an M-bit integer register.
   static inline constexpr auto M = 32U;
   static_assert (M >= wavetable_N);
+};
+
+
+template <typename Traits>
+struct oscillator_info {
+  static_assert (Traits::M >= Traits::wavetable_N);
 
   // The number of fractional bits for the constant multiplication factor used
   // by the oscillator's phase accumulator.
   static inline constexpr auto C_fractional_bits =
-      M - frequency::fractional_bits - wavetable_N;
+      Traits::M - frequency::fractional_bits - Traits::wavetable_N;
 
   /// When multiplying a UQa.b number by a UQc.d number, the result is
   /// UQ(a+c).(b+d). For the phase accumulator, a+c should be at least
@@ -53,9 +59,9 @@ struct osc_traits {
   static inline constexpr auto accumulator_fractional_bits =
       frequency::fractional_bits + C_fractional_bits;
 
-  using phase_index_type = ufixed<M, M - accumulator_fractional_bits>;
-  static_assert (phase_index_type::total_bits == M);
-  static_assert (phase_index_type::integral_bits == wavetable_N);
+  using phase_index_type = ufixed<Traits::M, Traits::M - accumulator_fractional_bits>;
+  static_assert (phase_index_type::total_bits == Traits::M);
+  static_assert (phase_index_type::integral_bits == Traits::wavetable_N);
 };
 
 template <typename Traits>
@@ -76,11 +82,11 @@ public:
   }
 
   constexpr amplitude phase_to_amplitude (
-      typename Traits::phase_index_type const phase) const noexcept {
+      typename oscillator_info<Traits>::phase_index_type const phase) const noexcept {
     // The most significant (wavetable_N) bits of the phase accumulator output
     // provide the index into the lookup table.
     auto const index = static_cast<uinteger_t<Traits::wavetable_N>> (
-        (phase.get () >> Traits::accumulator_fractional_bits) &
+        (phase.get () >> oscillator_info<Traits>::accumulator_fractional_bits) &
         mask_v<Traits::wavetable_N>);
 
     assert (index < table_size_);

@@ -45,7 +45,7 @@ static void stopAudio (AudioQueueRef queue) {
   AudioQueueBufferRef *buffers_;
   NSLock *lock_;
 
-  std::unique_ptr<synth::voice_assigner<sample_rate, synth::osc_traits>> voices_;
+  std::unique_ptr<synth::voice_assigner<sample_rate, synth::nco_traits>> voices_;
   MIDIPortRef port_;
   MIDIEndpointRef source_;
 }
@@ -62,7 +62,7 @@ static void stopAudio (AudioQueueRef queue) {
     queue_ = nil;
     buffers_ = nil;
     lock_ = [NSLock new];
-    voices_.reset (new synth::voice_assigner<sample_rate, synth::osc_traits>);
+    voices_.reset (new synth::voice_assigner<sample_rate, synth::nco_traits>);
     //    osc_->set_frequency (synth::oscillator::frequency::fromfp (440.0));
     port_ = 0;
     source_ = 0;
@@ -519,24 +519,25 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
 // set waveform
 // ~~~~~~~~~~~~
 - (void)setWaveform:(NSInteger)tag {
-  synth::wavetable<synth::osc_traits> const *w = nullptr;
+  using traits = synth::nco_traits;
+  synth::wavetable<traits> const *w = nullptr;
   NSString *name = @"";
   switch (tag) {
     case 0:
       name = @"sine";
-      w = &synth::sine<synth::osc_traits>;
+      w = &synth::sine<traits>;
       break;
     case 1:
       name = @"square";
-      w = &synth::square<synth::osc_traits>;
+      w = &synth::square<traits>;
       break;
     case 2:
       name = @"triangle";
-      w = &synth::triangle<synth::osc_traits>;
+      w = &synth::triangle<traits>;
       break;
     case 3:
       name = @"sawtooth=";
-      w = &synth::sawtooth<synth::osc_traits>;
+      w = &synth::sawtooth<traits>;
       break;
   }
   if (w == nullptr) {
