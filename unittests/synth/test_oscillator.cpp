@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 
+#include <iterator>
 #include <vector>
 
 #include "synth/nco.hpp"
@@ -20,8 +21,8 @@ public:
 
 auto Oscillator::make_samples (unsigned cycle_length)
     -> std::vector<amplitude> {
-  assert (sample_rate % cycle_length == 0U);
-  osc_.set_frequency (frequency::fromint (sample_rate / cycle_length));
+  osc_.set_frequency (
+      frequency::fromfp (sample_rate / static_cast<double> (cycle_length)));
 
   std::vector<amplitude> samples;
   ++cycle_length;  // One extra sample to catch the cycle repeat start.
@@ -56,4 +57,19 @@ TEST_F (Oscillator, QuarterNyquist) {
                             amplitude::fromfp (0.0), amplitude::fromfp (0.25),
                             amplitude::fromfp (0.5), amplitude::fromfp (0.75),
                             amplitude::fromfp (-1.0)));
+}
+
+TEST_F (Oscillator, SampleRateOverSix) {
+  auto const wavetable_entry = [this] (unsigned const index) {
+    assert (index < (size_t{1} << wt_.N));
+    auto it = wt_.begin ();
+    std::advance (it, index);
+    return *it;
+  };
+  EXPECT_THAT (
+      make_samples (6U),
+      testing::ElementsAre (wavetable_entry (0U), wavetable_entry (341U),
+                            wavetable_entry (682U), wavetable_entry (1023U),
+                            wavetable_entry (1365U), wavetable_entry (1706U),
+                            wavetable_entry (2047U)));
 }
