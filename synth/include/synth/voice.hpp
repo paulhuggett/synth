@@ -17,10 +17,11 @@ namespace synth {
 ///   f = 440 \cdot 2^{(n - 69)/12}
 /// \f]
 ///
+/// \param tuning The base tuning note. Nominally 440Hz.
 /// \param note  A MIDI note number.
 /// \returns  The frequency that corresponds to the MIDI note give by \p note.
-inline double midi_note_to_frequency (unsigned const note) {
-  return 440.0 * std::pow (2, (note - 69.0) / 12.0);
+inline double midi_note_to_frequency (double tuning, unsigned const note) {
+  return tuning * std::pow (2, (note - 69.0) / 12.0);
 }
 
 template <unsigned SampleRate, typename Traits>
@@ -53,9 +54,10 @@ private:
 // ~~~~~~~
 template <unsigned SampleRate, typename Traits>
 void voice<SampleRate, Traits>::note_on (unsigned const note) {
-  auto const f = midi_note_to_frequency (note);
-  osc_[0].set_frequency (frequency::fromfp (f));  // 8'
-  osc_[1].set_frequency (frequency::fromfp (f + 4.0));
+  osc_[0].set_frequency (
+      frequency::fromfp (midi_note_to_frequency (440, note)));  // 8'
+  osc_[1].set_frequency (
+      frequency::fromfp (midi_note_to_frequency (444, note)));
   env_.note_on ();
 }
 
