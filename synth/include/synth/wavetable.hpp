@@ -42,10 +42,11 @@ struct nco_traits {
   static_assert (M >= wavetable_N);
 };
 
-
+/// A collection of types and constants that are derived from the oscillator and
+/// wavetable traits type.
 template <typename Traits>
 struct oscillator_info {
-  static_assert (Traits::M >= Traits::wavetable_N);
+  static_assert (Traits::M >= frequency::fractional_bits + Traits::wavetable_N);
 
   // The number of fractional bits for the constant multiplication factor used
   // by the oscillator's phase accumulator.
@@ -67,8 +68,8 @@ struct oscillator_info {
 template <typename Traits>
 class wavetable {
 public:
-  // The number of entries in the wavetable is 2^N.
-  static constexpr inline auto N = Traits::wavetable_N;
+  /// The traits type with which this wavetable is associated.
+  using traits = Traits;
 
   /// \tparam Function  A function with signature equivalent to double(double).
   /// \param f A function f(θ) which will be invoked with θ from [0..2π).
@@ -97,6 +98,8 @@ public:
   constexpr auto end () const { return std::end (y_); }
 
 private:
+  // The number of entries in the wavetable is 2^N.
+  static constexpr inline auto N = Traits::wavetable_N;
   static constexpr auto table_size_ = size_t{1} << N;
   std::array<amplitude, table_size_> y_;
 };

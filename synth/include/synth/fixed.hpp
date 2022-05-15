@@ -56,10 +56,12 @@ public:
   constexpr bool operator!= (fixed other) const { return !operator== (other); }
 
   constexpr double as_double () const { return x_ / mul_; }
-  constexpr sinteger<integral_bits> integral_part () const {
-    return static_cast<sinteger<integral_bits>> (x_ >> fractional_bits);
+  constexpr decltype (auto) integral_part () const {
+    return static_cast<sinteger_t<integral_bits>> (x_ >> fractional_bits);
   }
-
+  constexpr uinteger_t<fractional_bits> fractional_part () const {
+    return x_ & mask_v<fractional_bits>;
+  }
   constexpr fixed operator+ (fixed const other) const {
     return fixed{x_ + other.x_};
   }

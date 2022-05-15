@@ -20,15 +20,15 @@
 
 namespace synth {
 
-template <unsigned SampleRate, typename Traits>
+template <unsigned SampleRate, typename Traits,
+          typename Wavetable = wavetable<Traits>>
 class oscillator {
 public:
   static inline constexpr const auto sample_rate = SampleRate;
 
-  constexpr explicit oscillator (wavetable<Traits> const* const NONNULL w)
-      : w_{w} {}
+  constexpr explicit oscillator (Wavetable const* const NONNULL w) : w_{w} {}
 
-  void set_wavetable (wavetable<Traits> const* const NONNULL w) { w_ = w; }
+  void set_wavetable (Wavetable const* const NONNULL w) { w_ = w; }
   void set_frequency (frequency const f) {
     increment_ = oscillator::phase_increment (f);
   }
@@ -44,16 +44,21 @@ private:
   static inline constexpr auto C =
       ufixed<oscillator_info<Traits>::C_fractional_bits, 0>::fromfp (
           static_cast<double> (1U << Traits::wavetable_N) / sample_rate);
+  static_assert (C.get () > 0U,
+                 "There are insufficient fractional bits for the phase "
+                 "accumulator constant");
 
   using phase_index_type = typename oscillator_info<Traits>::phase_index_type;
 
-  wavetable<Traits> const* NONNULL w_;
+  Wavetable const* NONNULL w_;
   phase_index_type increment_;
   phase_index_type phase_;
 
   constexpr phase_index_type phase_accumulator () {
     auto const result = phase_;
-    phase_ = phase_index_type{phase_.get () + increment_.get ()};
+    phase_ =
+        phase_index_type{static_cast<typename phase_index_type::value_type> (
+            phase_.get () + increment_.get ())};
     return result;
   }
 
@@ -69,7 +74,8 @@ private:
     static_assert (decltype (f)::fractional_bits +
                        decltype (C)::fractional_bits ==
                    phase_index_type::fractional_bits);
-    return phase_index_type{f.get () * C.get ()};
+    return phase_index_type{static_cast<typename phase_index_type::value_type> (
+        f.get () * C.get ())};
   }
 };
 
