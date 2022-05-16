@@ -27,15 +27,16 @@ void dump_wavetable (wavetable<Traits> const &w) {
 }
 
 constexpr auto c4 = 60U;  // (middle C)
+constexpr auto tuning = 440.0;
 std::array<frequency, 8> const c_major{{
-    frequency::fromfp (midi_note_to_frequency (c4)),        // C4
-    frequency::fromfp (midi_note_to_frequency (c4 + 2U)),   // D4
-    frequency::fromfp (midi_note_to_frequency (c4 + 4U)),   // E4
-    frequency::fromfp (midi_note_to_frequency (c4 + 5U)),   // F4
-    frequency::fromfp (midi_note_to_frequency (c4 + 7U)),   // G4
-    frequency::fromfp (midi_note_to_frequency (c4 + 9U)),   // A4
-    frequency::fromfp (midi_note_to_frequency (c4 + 11U)),  // B4
-    frequency::fromfp (midi_note_to_frequency (c4 + 12U)),  // C5
+    frequency::fromfp (midi_note_to_frequency (tuning, c4)),        // C4
+    frequency::fromfp (midi_note_to_frequency (tuning, c4 + 2U)),   // D4
+    frequency::fromfp (midi_note_to_frequency (tuning, c4 + 4U)),   // E4
+    frequency::fromfp (midi_note_to_frequency (tuning, c4 + 5U)),   // F4
+    frequency::fromfp (midi_note_to_frequency (tuning, c4 + 7U)),   // G4
+    frequency::fromfp (midi_note_to_frequency (tuning, c4 + 9U)),   // A4
+    frequency::fromfp (midi_note_to_frequency (tuning, c4 + 11U)),  // B4
+    frequency::fromfp (midi_note_to_frequency (tuning, c4 + 12U)),  // C5
 }};
 
 constexpr auto sample_rate = 48000U;
