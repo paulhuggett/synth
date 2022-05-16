@@ -55,7 +55,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
         run: |
-          sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}"                          \
+          sonar-scanner -X \
+                        --define sonar.host.url="${{ env.SONAR_SERVER_URL }}"                          \
                         --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}" \
                         --define sonar.projectKey=paulhuggett_synth                                    \
                         --define sonar.projectName=synth                                               \
