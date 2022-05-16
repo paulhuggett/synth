@@ -28,9 +28,9 @@ public:
 private:
   static constexpr auto unassigned = std::numeric_limits<unsigned>::max ();
   struct vm {
-    vm () : v{&triangle<Traits>}, note{unassigned} {}
+    vm () : v{&triangle<Traits>} {}
     voice<SampleRate, Traits> v;
-    unsigned note;
+    unsigned note = unassigned;
   };
   std::array<vm, 8> voices_;
   unsigned next_ = 0U;
