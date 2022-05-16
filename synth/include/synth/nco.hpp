@@ -24,7 +24,7 @@ template <unsigned SampleRate, typename Traits,
           typename Wavetable = wavetable<Traits>>
 class oscillator {
 public:
-  static inline constexpr const auto sample_rate = SampleRate;
+  static constexpr const auto sample_rate = SampleRate;
 
   constexpr explicit oscillator (Wavetable const* const NONNULL w) : w_{w} {}
 
@@ -33,7 +33,7 @@ public:
     increment_ = oscillator::phase_increment (f);
   }
 
-  constexpr amplitude tick () {
+  amplitude tick () {
     return w_->phase_to_amplitude (this->phase_accumulator ());
   }
 
@@ -41,7 +41,7 @@ private:
   /// phase_increment() wants to compute f/(S*r) where S is the sample rate and
   /// r is the number of entries in a wavetable. Everything but f is constant
   /// and we'd like to eliminate the division, so rearrange to get f*(r/S).
-  static inline constexpr auto C =
+  static constexpr auto C =
       ufixed<oscillator_info<Traits>::C_fractional_bits, 0>::fromfp (
           static_cast<double> (1U << Traits::wavetable_N) / sample_rate);
   static_assert (C.get () > 0U,
@@ -54,7 +54,7 @@ private:
   phase_index_type increment_;
   phase_index_type phase_;
 
-  constexpr phase_index_type phase_accumulator () {
+  phase_index_type phase_accumulator () {
     auto const result = phase_;
     phase_ =
         phase_index_type{static_cast<typename phase_index_type::value_type> (

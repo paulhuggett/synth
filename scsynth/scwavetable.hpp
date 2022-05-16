@@ -29,9 +29,9 @@ constexpr inline double two_pi = 2.0 * pi;
 // to eliminate exact 1.0.
 using amplitude = sc_fixed<32, 1>;
 
-inline constexpr auto frequency_wl = 32;
-inline constexpr auto frequency_iwl = 25;
-inline constexpr auto frequency_fwl = frequency_wl - frequency_iwl;
+constexpr auto frequency_wl = 32;
+constexpr auto frequency_iwl = 25;
+constexpr auto frequency_fwl = frequency_wl - frequency_iwl;
 using frequency = sc_ufixed<frequency_wl, frequency_iwl>;
 
 class sine_wavetable : public sc_module {

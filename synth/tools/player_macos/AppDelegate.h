@@ -4,7 +4,7 @@
 #import <TargetConditionals.h>
 #include "synth/envelope.hpp"
 
-inline constexpr auto sample_rate = 48000U;
+constexpr auto sample_rate = 48000U;
 
 #if TARGET_OS_OSX
 

@@ -11,9 +11,9 @@ namespace {
 
 struct test_traits {
   /// The number of entries in a wavetable is 2^wavetable_N.
-  static inline constexpr auto wavetable_N = 4U;
+  static constexpr auto wavetable_N = 4U;
   /// Phase accumulation is performed in an M-bit integer register.
-  static inline constexpr auto M = 32U;
+  static constexpr auto M = 32U;
 };
 
 template <typename Traits>

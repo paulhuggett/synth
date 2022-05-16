@@ -17,7 +17,7 @@ namespace scsynth {
 
 class oscillator : public sc_core::sc_module {
 public:
-  static inline constexpr const auto sample_rate = 48000U;
+  static constexpr const auto sample_rate = 48000U;
 
   sc_in_clk clock;
   sc_in<bool> reset;
@@ -64,7 +64,7 @@ public:
 
 private:
   /// Phase accumulation is performed in an M-bit integer register.
-  static inline constexpr auto M = 32U;
+  static constexpr auto M = 32U;
   static_assert (M >= sine_wavetable::N);
 
   // sine_wavetable const* __nonnull w_;
@@ -75,18 +75,17 @@ private:
   /// r is the number of entries in a wavetable. Everything but f is constant
   /// and we'd like to eliminate the division, so rearrange to get f*(r/S).
   /// Here, C gets the value r/S.
-  static inline constexpr auto C2 =
+  static constexpr auto C2 =
       static_cast<double> (1U << sine_wavetable::N) / sample_rate;
   static_assert (C2 <= 1.0);
-  static inline constexpr auto Cbits = M - frequency_fwl - sine_wavetable::N;
+  static constexpr auto Cbits = M - frequency_fwl - sine_wavetable::N;
   static inline auto const C = sc_ufixed<Cbits, 0>{C2};
 
   /// When multiplying a UQa.b number by a UQc.d number, the result is
   /// UQ(a+c).(b+d). For the phase accumulator, a+c should be at least
   /// sine_wavetable::N but may be more (we don't care if it overflows); b+d
   /// should be as large as possible to maintain precision.
-  static inline constexpr auto accumulator_fractional_bits =
-      frequency_fwl + Cbits;
+  static constexpr auto accumulator_fractional_bits = frequency_fwl + Cbits;
 
   sc_uint<sine_wavetable::N> phase_accumulator () {
     // The most significant (sine_wavetable::N) bits of the phase accumulator

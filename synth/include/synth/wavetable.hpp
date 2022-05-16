@@ -35,10 +35,10 @@ using amplitude = fixed<32, 1>;
 
 struct nco_traits {
   /// The number of entries in a wavetable is 2^wavetable_N.
-  static inline constexpr auto wavetable_N = 11U;
+  static constexpr auto wavetable_N = 11U;
 
   /// Phase accumulation is performed in an M-bit integer register.
-  static inline constexpr auto M = 32U;
+  static constexpr auto M = 32U;
   static_assert (M >= wavetable_N);
 };
 
@@ -50,14 +50,14 @@ struct oscillator_info {
 
   // The number of fractional bits for the constant multiplication factor used
   // by the oscillator's phase accumulator.
-  static inline constexpr auto C_fractional_bits =
+  static constexpr auto C_fractional_bits =
       Traits::M - frequency::fractional_bits - Traits::wavetable_N;
 
   /// When multiplying a UQa.b number by a UQc.d number, the result is
   /// UQ(a+c).(b+d). For the phase accumulator, a+c should be at least
   /// wavetable::N but may be more (we don't care if it overflows); b+d should
   /// be as large as possible to maintain precision.
-  static inline constexpr auto accumulator_fractional_bits =
+  static constexpr auto accumulator_fractional_bits =
       frequency::fractional_bits + C_fractional_bits;
 
   using phase_index_type = ufixed<Traits::M, Traits::M - accumulator_fractional_bits>;

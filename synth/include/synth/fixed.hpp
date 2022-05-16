@@ -28,9 +28,9 @@ template <unsigned TotalBits, unsigned IntegralBits,
           typename = typename std::enable_if_t<TotalBits >= IntegralBits>>
 class fixed {
 public:
-  static inline constexpr auto total_bits = TotalBits;
-  static inline constexpr auto integral_bits = IntegralBits;
-  static inline constexpr auto fractional_bits = TotalBits - IntegralBits - 1U;
+  static constexpr auto total_bits = TotalBits;
+  static constexpr auto integral_bits = IntegralBits;
+  static constexpr auto fractional_bits = TotalBits - IntegralBits - 1U;
 
   using value_type = sinteger_t<total_bits>;
   constexpr fixed () = default;
@@ -78,7 +78,7 @@ private:
   explicit constexpr fixed (value_type const x) : x_{x} {}
 
   value_type x_ = 0;
-  static inline constexpr auto mul_ = static_cast<double> (
+  static constexpr auto mul_ = static_cast<double> (
       uinteger_t<fractional_bits + 1>{1} << fractional_bits);
 };
 
@@ -92,9 +92,9 @@ template <unsigned TotalBits, unsigned IntegralBits,
           typename = typename std::enable_if_t<TotalBits >= IntegralBits>>
 class ufixed {
 public:
-  static inline constexpr auto total_bits = TotalBits;
-  static inline constexpr auto integral_bits = IntegralBits;
-  static inline constexpr auto fractional_bits = total_bits - integral_bits;
+  static constexpr auto total_bits = TotalBits;
+  static constexpr auto integral_bits = IntegralBits;
+  static constexpr auto fractional_bits = total_bits - integral_bits;
 
   using value_type = uinteger_t<total_bits>;
 
@@ -141,7 +141,7 @@ public:
 
 private:
   value_type x_ = 0;
-  static inline constexpr auto mul_ = static_cast<double> (
+  static constexpr auto mul_ = static_cast<double> (
       uinteger_t<fractional_bits + 1>{1} << fractional_bits);
 };
 

@@ -790,9 +790,6 @@
                                     <gridCell row="GGL-Qt-b9X" column="wAB-ec-Zou" id="Gqy-aJ-mCZ">
                                         <containerView key="contentView" translatesAutoresizingMaskIntoConstraints="NO" id="mjq-bE-PAz">
                                             <rect key="frame" x="54" y="116" width="325" height="80"/>
-                                            <connections>
-                                                <segue destination="yPp-8q-Ibe" kind="embed" id="W7r-kV-OCc"/>
-                                            </connections>
                                         </containerView>
                                     </gridCell>
                                     <gridCell row="dwA-8w-EnL" column="ril-ps-Oxx" id="pFa-ED-8Dh">
@@ -899,16 +896,16 @@
             </objects>
             <point key="canvasLocation" x="49.5" y="836.5"/>
         </scene>
-        <!--View Controller-->
+        <!--this is the title-->
         <scene sceneID="rrH-kV-lVM">
             <objects>
-                <viewController id="yPp-8q-Ibe" sceneMemberID="viewController">
+                <viewController title="this is the title" id="yPp-8q-Ibe" sceneMemberID="viewController">
                     <view key="view" id="k73-zZ-ii5">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="216"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YIm-fr-xK9">
-                                <rect key="frame" x="108" y="241" width="133" height="25"/>
+                                <rect key="frame" x="17" y="172" width="133" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="126" id="fvm-JB-O8N"/>
                                 </constraints>
@@ -932,15 +929,17 @@
                             </popUpButton>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="YIm-fr-xK9" firstAttribute="top" secondItem="k73-zZ-ii5" secondAttribute="top" constant="35" id="Nhb-Yt-0Ph"/>
+                            <constraint firstItem="YIm-fr-xK9" firstAttribute="top" secondItem="k73-zZ-ii5" secondAttribute="top" constant="20" symbolic="YES" id="0m2-Uq-iV0"/>
+                            <constraint firstItem="YIm-fr-xK9" firstAttribute="top" secondItem="k73-zZ-ii5" secondAttribute="top" constant="20" id="Nhb-Yt-0Ph"/>
                             <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="YIm-fr-xK9" secondAttribute="trailing" constant="20" symbolic="YES" id="OVd-k5-gCM"/>
-                            <constraint firstItem="YIm-fr-xK9" firstAttribute="leading" secondItem="k73-zZ-ii5" secondAttribute="leading" constant="111" id="Y27-RW-0oP"/>
+                            <constraint firstItem="YIm-fr-xK9" firstAttribute="leading" secondItem="k73-zZ-ii5" secondAttribute="leading" constant="20" id="Y27-RW-0oP"/>
+                            <constraint firstItem="YIm-fr-xK9" firstAttribute="leading" secondItem="k73-zZ-ii5" secondAttribute="leading" constant="20" symbolic="YES" id="pib-tD-2vy"/>
                         </constraints>
                     </view>
                 </viewController>
                 <customObject id="keg-HB-6U4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-456" y="888"/>
+            <point key="canvasLocation" x="-456" y="846"/>
         </scene>
     </scenes>
     <resources>
