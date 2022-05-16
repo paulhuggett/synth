@@ -79,7 +79,10 @@ using test_sample_rates =
 TYPED_TEST_SUITE (Oscillator, test_sample_rates);
 
 TYPED_TEST (Oscillator, DC) {
-  using testing::Return, testing::Throw, testing::_;
+  using testing::Return;
+  using testing::Throw;
+  using testing::_;
+
   using traits = test_traits;
   using phase_index_type = typename oscillator_info<traits>::phase_index_type;
   constexpr unsigned sample_rate = TypeParam ();
@@ -99,7 +102,10 @@ TYPED_TEST (Oscillator, DC) {
 }
 
 TYPED_TEST (Oscillator, Nyquist) {
-  using testing::Return, testing::Throw, testing::_;
+  using testing::Return;
+  using testing::Throw;
+  using testing::_;
+
   using traits = test_traits;
   using phase_index_type = typename oscillator_info<traits>::phase_index_type;
 
@@ -127,7 +133,10 @@ TYPED_TEST (Oscillator, Nyquist) {
 }
 
 TYPED_TEST (Oscillator, HalfNyquist) {
-  using testing::Return, testing::Throw, testing::_;
+  using testing::Return;
+  using testing::Throw;
+  using testing::_;
+
   using traits = test_traits;
   using phase_index_type = typename oscillator_info<traits>::phase_index_type;
 
