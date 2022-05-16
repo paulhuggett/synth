@@ -205,7 +205,7 @@ OutputIterator emit_wave_file (ForwardIterator first_sample,
                                    + sizeof (uint32_t)   // dwSamplesPerSec
                                    + sizeof (uint32_t)   // dwAvgBytesPerSec
                                    + sizeof (uint16_t)   // wBlockAlign
-                                   + sizeof (uint16_t);  // wBitsPerSample;
+                                   + sizeof (uint16_t);  // wBitsPerSample
   constexpr uint32_t fourcc_size = 4U;
   constexpr uint32_t chunk =
       fourcc_size + sizeof (uint32_t);  // Size of each chunk's ckID + ckSize
