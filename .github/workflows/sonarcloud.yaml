@@ -14,6 +14,7 @@ jobs:
                                         # https://docs.sonarcloud.io/advanced-setup/ci-based-analysis/sonarscanner-cli/
       SONAR_SERVER_URL: "https://sonarcloud.io"
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
+      SONAR_CACHE_DIR: build_cache_dir
     steps:
       - uses: actions/checkout@v2
         with:
@@ -30,6 +31,11 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+      - name Cache Analysis
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-sonar-analysis
+          path: ${{ env.SONAR_CACHE_DIR }}
       - name: Download and set up sonar-scanner
         env:
           SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-macosx.zip
@@ -57,6 +63,8 @@ jobs:
         run: |
           sonar-scanner -X \
                         --define sonar.host.url="${{ env.SONAR_SERVER_URL }}"                          \
+                        --define sonar.cfamily.cache.enabled=true                                      \
+                        --define sonar.cfamily.cache.path="${{ env.SONAR_CACHE_DIR }}"                 \
                         --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}" \
                         --define sonar.projectKey=paulhuggett_synth                                    \
                         --define sonar.projectName=synth                                               \
