@@ -19,6 +19,7 @@ struct test_traits {
 template <typename Traits>
 class wavetable_base {
 public:
+  virtual ~wavetable_base () noexcept = default;
   virtual amplitude phase_to_amplitude (
       typename oscillator_info<Traits>::phase_index_type const phase) const = 0;
 };
@@ -45,7 +46,7 @@ std::vector<amplitude> const results{{
     amplitude::fromint (0, 0x35e50d7),   // 1/19=0.0526316
 }};
 
-}  // namespace
+}  // end anonymous namespace
 
 template <typename T>
 class Oscillator : public testing::Test {
@@ -59,7 +60,7 @@ protected:
 private:
   template <typename UnsignedType, typename = typename std::enable_if_t<
                                        std::is_unsigned_v<UnsignedType>>>
-  constexpr bool is_power_of_2 (UnsignedType const v) {
+  static constexpr bool is_power_of_2 (UnsignedType const v) {
     return (v & (v - 1U)) == 0U;
   }
 };
