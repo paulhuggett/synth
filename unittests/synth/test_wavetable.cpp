@@ -32,8 +32,6 @@ constexpr unsigned pop_count (T const x) noexcept {
   return x == T{0} ? 0U : (x & T{1}) + pop_count (T{x >> 1U});
 }
 
-using phase_index_type = oscillator_info<nco_traits>::phase_index_type;
-
 template <typename UFixed>
 constexpr typename UFixed::value_type reciprocal (unsigned const f) {
   assert (pop_count (f) == 1U);
@@ -54,16 +52,6 @@ TEST (Wavetable, f) {
   wavetable<my_traits> wt{f};
   using phase_index_type =
       oscillator_info<decltype (wt)::traits>::phase_index_type;
-
-  std::cout << phase_index_type::fromfp (3 / 4.0) << '\n';
-  std::cout << phase_index_type::fromint (
-                   0, 1 << (phase_index_type::fractional_bits - 2))
-                   .as_double ()
-            << '\n';
-  std::cout << phase_index_type::fromint (
-                   0, 1 << (phase_index_type::fractional_bits - 3))
-                   .as_double ()
-            << '\n';
 
   constexpr auto zero = phase_index_type::fromint (0);
   constexpr auto q0_75 = phase_index_type::fromint (
