@@ -123,7 +123,7 @@ auto envelope<SampleRate>::tick (amplitude const v) -> amplitude {
         break;
       }
       phase_ = phase::decay;
-      // FALLTHROUGH
+      [[fallthrough]];
     case phase::decay:
       if (decay_ <= 0.0) {
         a_ = amplitude::fromfp (sustain_);
@@ -132,7 +132,7 @@ auto envelope<SampleRate>::tick (amplitude const v) -> amplitude {
         break;
       }
       phase_ = phase::sustain;
-      // FALLTHROUGH
+      [[fallthrough]];
     case phase::sustain:
       return amplitude::fromfp (v.as_double () * sustain_);
 
@@ -144,7 +144,7 @@ auto envelope<SampleRate>::tick (amplitude const v) -> amplitude {
         break;
       }
       phase_ = phase::idle;
-      // FALLTHROUGH
+      [[fallthrough]];
     case phase::idle:
       return amplitude::fromfp (0.0);
   }
