@@ -77,8 +77,9 @@ public:
   explicit wavetable (Function f) {
     // Initialize the lookup table with exactly one cycle of our waveform.
     auto k = size_t{0};
+    constexpr double delta = two_pi / table_size_;
     std::generate (std::begin (y_), std::end (y_), [f, &k] {
-      return amplitude::fromfp (f (two_pi * k++ / table_size_));
+      return amplitude::fromfp (f (static_cast<double> (k++) * delta));
     });
   }
 

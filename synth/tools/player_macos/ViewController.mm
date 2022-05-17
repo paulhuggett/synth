@@ -28,7 +28,7 @@
   appd_ = [[NSApplication sharedApplication] delegate];
   activeImage_ = [NSImage imageNamed:NSImageNameStatusAvailable];
   inactiveImage_ = [NSImage imageNamed:NSImageNameStatusUnavailable];
-  for (int segment = 0, lastSegment = voices.segmentCount; segment < lastSegment; ++segment) {
+  for (NSInteger segment = 0, lastSegment = voices.segmentCount; segment < lastSegment; ++segment) {
     [voices setImage:inactiveImage_ forSegment:segment];
   }
 #elif TARGET_OS_IOS
@@ -57,7 +57,7 @@
     return;
   }
   prevActive_ = active;
-  for (int segment = 0, lastSegment = voices.segmentCount; segment < lastSegment; ++segment) {
+  for (NSInteger segment = 0, lastSegment = voices.segmentCount; segment < lastSegment; ++segment) {
     NSImage *const image = (active & (1U << segment)) != 0 ? activeImage_ : inactiveImage_;
     [voices setImage:image forSegment:segment];
   }
