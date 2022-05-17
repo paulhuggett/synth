@@ -151,7 +151,10 @@ int main () {
     }
     return theta;
   };
-  for (double theta = -pi; theta <= pi; theta += (2.0 * pi) / 200.0) {
+
+  constexpr auto steps = 200U;
+  for (auto ctr = 0U; ctr <= steps; ++ctr) {
+    auto const theta = static_cast<double> (ctr * 2U) * pi / steps - pi;
     auto const [s, c] = cordic (convert::fromfp (adjust (theta)));
     std::cout << theta << ' ' << convert::tofp (s) << '\n';
   }
