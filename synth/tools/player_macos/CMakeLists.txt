@@ -29,6 +29,8 @@ if (APPLE)
       AppDelegate.h
       AppDelegate.mm
       Assets.xcassets
+      MIDIChangeHandler.mm
+      MIDIChangeHandler.h
       ViewController.h
       ViewController.mm
       player_macos.mm
@@ -85,6 +87,8 @@ if (APPLE)
     target_sources (player_ios PRIVATE
       AppDelegate.h
       AppDelegate.mm
+      MIDIChangeHandler.mm
+      MIDIChangeHandler.h
       Assets.xcassets
       ViewController.h
       ViewController.mm
