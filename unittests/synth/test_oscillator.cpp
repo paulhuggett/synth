@@ -167,7 +167,10 @@ TYPED_TEST (Oscillator, HalfNyquist) {
 }
 
 TYPED_TEST (Oscillator, QuarterNyquist) {
-  using testing::Return, testing::Throw, testing::_;
+  using testing::_;
+  using testing::Return;
+  using testing::Throw;
+
   using traits = test_traits;
   using phase_index_type = typename oscillator_info<traits>::phase_index_type;
 
@@ -211,7 +214,10 @@ TYPED_TEST (Oscillator, QuarterNyquist) {
 }
 
 TEST (Oscillator, NyquistByThree) {
-  using testing::Return, testing::Throw, testing::_;
+  using testing::_;
+  using testing::Return;
+  using testing::Throw;
+
   using traits = test_traits;
   using phase_index_type = typename oscillator_info<traits>::phase_index_type;
 
