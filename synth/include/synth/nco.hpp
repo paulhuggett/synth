@@ -24,6 +24,7 @@ template <unsigned SampleRate, typename Traits,
           typename Wavetable = wavetable<Traits>>
 class oscillator {
 public:
+  using traits = Traits;
   static constexpr const auto sample_rate = SampleRate;
 
   constexpr explicit oscillator (Wavetable const* const NONNULL w) : w_{w} {}
@@ -38,17 +39,22 @@ public:
   }
 
 private:
+  static_assert (traits::wavetable_N == Wavetable::traits::wavetable_N,
+                 "The wavetable traits and oscillator traits must match");
+  static_assert (traits::M == Wavetable::traits::M,
+                 "The wavetable traits and oscillator traits must match");
+
   /// phase_increment() wants to compute f/(S*r) where S is the sample rate and
   /// r is the number of entries in a wavetable. Everything but f is constant
   /// and we'd like to eliminate the division, so rearrange to get f*(r/S).
   static constexpr auto C =
-      ufixed<oscillator_info<Traits>::C_fractional_bits, 0>::fromfp (
-          static_cast<double> (1U << Traits::wavetable_N) / sample_rate);
+      ufixed<oscillator_info<traits>::C_fractional_bits, 0>::fromfp (
+          static_cast<double> (1U << traits::wavetable_N) / sample_rate);
   static_assert (C.get () > 0U,
                  "There are insufficient fractional bits for the phase "
                  "accumulator constant");
 
-  using phase_index_type = typename oscillator_info<Traits>::phase_index_type;
+  using phase_index_type = typename oscillator_info<traits>::phase_index_type;
 
   Wavetable const* NONNULL w_;
   phase_index_type increment_;

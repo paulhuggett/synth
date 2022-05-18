@@ -19,6 +19,8 @@ struct test_traits {
 template <typename Traits>
 class wavetable_base {
 public:
+  using traits = Traits;
+
   virtual ~wavetable_base () noexcept = default;
   virtual amplitude phase_to_amplitude (
       typename oscillator_info<Traits>::phase_index_type const phase) const = 0;
