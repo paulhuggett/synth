@@ -37,7 +37,7 @@ using frequency = sc_ufixed<frequency_wl, frequency_iwl>;
 class sine_wavetable : public sc_module {
 public:
   // The number of entries in the wavetable is 2^N.
-  static constexpr inline auto N = 11U;
+  static constexpr auto N = 11U;
 
   //  sc_in_clk clock;
   sc_in<sc_uint<N>> phase;

@@ -100,7 +100,7 @@ public:
 
 private:
   // The number of entries in the wavetable is 2^N.
-  static constexpr inline auto N = Traits::wavetable_N;
+  static constexpr auto N = Traits::wavetable_N;
   static constexpr auto table_size_ = size_t{1} << N;
   std::array<amplitude, table_size_> y_;
 };
