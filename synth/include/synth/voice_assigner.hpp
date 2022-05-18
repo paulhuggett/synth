@@ -98,11 +98,9 @@ void voice_assigner<SampleRate, Traits>::set_envelope (
 // ~~~~
 template <unsigned SampleRate, typename Traits>
 double voice_assigner<SampleRate, Traits>::tick () {
-  return std::accumulate (std::begin (voices_), std::end (voices_), 0.0,
-                          [] (double acc, vm &v) {
-                            return acc + v.v.tick ().as_double ();
-                          }) /
-         voices_.size ();
+  return std::accumulate (
+      std::begin (voices_), std::end (voices_), 0.0,
+      [] (double acc, vm &v) { return acc + v.v.tick ().as_double (); });
 }
 
 }  // end namespace synth
