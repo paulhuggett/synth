@@ -99,9 +99,10 @@ std::pair<int32_t, int32_t> cordic (int32_t const theta) {
   auto y = int32_t{0};
   auto z = theta;
   for (auto k = 0U; k < iterations; ++k) {
-    // Extract the sign bit from z. Could be written as:
-    // int32_t const d = z >= 0 ? 0 : -1;
+    // Extract the sign bit from z.
     int32_t const d = z >> 31;
+    assert (d == (z >= 0 ? 0 : -1) &&
+            "The expression could also be written in this form");
 
     int32_t const tx = x - (((y >> k) ^ d) - d);
     int32_t const ty = y + (((x >> k) ^ d) - d);
