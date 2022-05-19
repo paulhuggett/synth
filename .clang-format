@@ -37,7 +37,7 @@ AllowShortLoopsOnASingleLine                   : false
 #Cpp11BracedListStyle                           : true
 #DerivePointerAlignment                         : false
 #EmptyLineBeforeAccessModifier                  : LogicalBlock
-#IndentCaseLabels                               : false
+IndentCaseLabels                               : false
 #IndentFunctionDeclarationAfterType             : false
 #IndentPPDirectives                             : BeforeHash
 #IndentWidth                                    : 2
