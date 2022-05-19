@@ -73,7 +73,6 @@ void chirp (std::vector<double> *const samples) {
 
 }  // end anonymous namespace
 
-
 int main () {
   std::vector<double> samples;
 

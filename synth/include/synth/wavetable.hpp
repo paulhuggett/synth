@@ -60,7 +60,8 @@ struct oscillator_info {
   static constexpr auto accumulator_fractional_bits =
       frequency::fractional_bits + C_fractional_bits;
 
-  using phase_index_type = ufixed<Traits::M, Traits::M - accumulator_fractional_bits>;
+  using phase_index_type =
+      ufixed<Traits::M, Traits::M - accumulator_fractional_bits>;
   static_assert (phase_index_type::total_bits == Traits::M);
   static_assert (phase_index_type::integral_bits == Traits::wavetable_N);
 };
@@ -84,7 +85,8 @@ public:
   }
 
   constexpr amplitude phase_to_amplitude (
-      typename oscillator_info<Traits>::phase_index_type const phase) const noexcept {
+      typename oscillator_info<Traits>::phase_index_type const phase)
+      const noexcept {
     // The most significant (wavetable_N) bits of the phase accumulator output
     // provide the index into the lookup table.
     auto const index = static_cast<uinteger_t<Traits::wavetable_N>> (

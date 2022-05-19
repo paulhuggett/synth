@@ -76,36 +76,22 @@ void envelope<SampleRate>::set (phase p, double v) {
     v = v > 0.0 ? 1.0 / (v * SampleRate) : 0.0;
   }
   switch (p) {
-    case phase::idle:
-      break;
-    case phase::attack:
-      attack_ = v;
-      break;
-    case phase::decay:
-      decay_ = v;
-      break;
-    case phase::sustain:
-      sustain_ = std::min (v, 1.0);
-      break;
-    case phase::release:
-      release_ = v;
-      break;
+    case phase::idle: break;
+    case phase::attack: attack_ = v; break;
+    case phase::decay: decay_ = v; break;
+    case phase::sustain: sustain_ = std::min (v, 1.0); break;
+    case phase::release: release_ = v; break;
   }
 }
 
 template <unsigned SampleRate>
 char const* NONNULL envelope<SampleRate>::phase_name (phase const p) noexcept {
   switch (p) {
-    case phase::idle:
-      return "idle";
-    case phase::sustain:
-      return "sustain";
-    case phase::attack:
-      return "attack";
-    case phase::decay:
-      return "decay";
-    case phase::release:
-      return "release";
+    case phase::idle: return "idle";
+    case phase::sustain: return "sustain";
+    case phase::attack: return "attack";
+    case phase::decay: return "decay";
+    case phase::release: return "release";
   }
   return "";
 }
@@ -133,8 +119,7 @@ auto envelope<SampleRate>::tick (amplitude const v) -> amplitude {
       }
       phase_ = phase::sustain;
       [[fallthrough]];
-    case phase::sustain:
-      return amplitude::fromfp (v.as_double () * sustain_);
+    case phase::sustain: return amplitude::fromfp (v.as_double () * sustain_);
 
     case phase::release:
       if (release_ <= 0) {
@@ -145,8 +130,7 @@ auto envelope<SampleRate>::tick (amplitude const v) -> amplitude {
       }
       phase_ = phase::idle;
       [[fallthrough]];
-    case phase::idle:
-      return amplitude::fromfp (0.0);
+    case phase::idle: return amplitude::fromfp (0.0);
   }
 
   a_ = amplitude::fromfp (a_.as_double () + delta);
