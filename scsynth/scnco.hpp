@@ -2,14 +2,13 @@
 #ifndef SYNTH_SC_NCO_HPP
 #define SYNTH_SC_NCO_HPP
 
+#include <systemc.h>
+
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <limits>
-
-#define SC_INCLUDE_FX 1
-#include <systemc.h>
 
 #include "scwavetable.hpp"
 

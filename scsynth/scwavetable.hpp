@@ -2,12 +2,11 @@
 #ifndef SYNTH_SCWAVETABLE_HPP
 #define SYNTH_SCWAVETABLE_HPP
 
+#include <systemc.h>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
-
-#define SC_INCLUDE_FX 1
-#include <systemc.h>
 
 namespace scsynth {
 
