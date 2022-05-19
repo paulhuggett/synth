@@ -26,6 +26,9 @@ jobs:
         with:
           java-version: 11
 
+      - name: Install ninja
+        run: brew install ninja
+
       - name: Cache SonarCloud packages and analysis
         uses: actions/cache@v3
         with:
