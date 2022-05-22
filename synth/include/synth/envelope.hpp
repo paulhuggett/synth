@@ -102,27 +102,35 @@ auto envelope<SampleRate>::tick (amplitude const v) -> amplitude {
 
   switch (phase_) {
   case phase::attack:
-    if (attack_ <= 0.0) {
+    assert (attack_ >= 0.0);
+    if (attack_ == 0.0) {
       a_ = amplitude::fromfp (1.0);
     } else if (a_.as_double () < 1.0) {
+      // Increase the amplitude at the attack_ rate.
       delta = attack_;
       break;
     }
     phase_ = phase::decay;
     [[fallthrough]];
   case phase::decay:
-    if (decay_ <= 0.0) {
+    assert (decay_ >= 0.0);
+    if (decay_ == 0.0) {
       a_ = amplitude::fromfp (sustain_);
     } else if (a_.as_double () > sustain_) {
+      // Allow the amplitude to drop to the sustain level at the rate set by
+      // decay_.
       delta = -decay_;
       break;
     }
     phase_ = phase::sustain;
     [[fallthrough]];
-  case phase::sustain: return amplitude::fromfp (v.as_double () * sustain_);
-
+  case phase::sustain:
+    // Sustain is a fixed amplitude.
+    assert (sustain_ >= 0.0 && sustain_ <= 1.0);
+    return amplitude::fromfp (v.as_double () * sustain_);
   case phase::release:
-    if (release_ <= 0) {
+    assert (release_ >= 0.0);
+    if (release_ == 0.0) {
       a_ = amplitude::fromfp (0.0);
     } else if (a_.as_double () > 0.0) {
       delta = -release_;
@@ -132,7 +140,8 @@ auto envelope<SampleRate>::tick (amplitude const v) -> amplitude {
     [[fallthrough]];
   case phase::idle: return amplitude::fromfp (0.0);
   }
-
+  // If this addition could saturate to 1s for overflow or 0s for underflow, the
+  // special cases for 0 in the above switch could be removed.
   a_ = amplitude::fromfp (a_.as_double () + delta);
   return amplitude::fromfp (v.as_double () * a_.as_double ());
 }
