@@ -23,6 +23,6 @@ if (COVERAGE_ENABLED)
     $<$<CXX_COMPILER_ID:GNU>:${gcc_linker_coverage}>
     $<$<CXX_COMPILER_ID:MSVC>:${msvc_linker_coverage}>
   )
-end (COVERAGE_ENABLED)
+endif (COVERAGE_ENABLED)
 
 target_link_libraries(test_synth PRIVATE gmock_main synth)
