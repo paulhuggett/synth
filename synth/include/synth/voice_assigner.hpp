@@ -28,7 +28,8 @@ public:
 private:
   static constexpr auto unassigned = std::numeric_limits<unsigned>::max ();
   struct vm {
-    voice<SampleRate, Traits> v{&triangle<Traits>};
+    using wt = wavetable<Traits>;
+    voice<SampleRate, Traits, wt> v;
     unsigned note = unassigned;
   };
   std::array<vm, 8> voices_;
@@ -80,7 +81,7 @@ template <unsigned SampleRate, typename Traits>
 void voice_assigner<SampleRate, Traits>::set_wavetable (
     wavetable<Traits> const *const w) {
   for (auto &v : voices_) {
-    v.v.set_wavetable (w);
+    //    v.v.set_wavetable (w);
   }
 }
 

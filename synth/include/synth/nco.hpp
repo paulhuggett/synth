@@ -27,6 +27,7 @@ public:
   using traits = Traits;
   static constexpr const auto sample_rate = SampleRate;
 
+  constexpr oscillator () : w_{default_wavetable<Wavetable>{}()} {}
   constexpr explicit oscillator (Wavetable const* const NONNULL w) : w_{w} {}
 
   void set_wavetable (Wavetable const* const NONNULL w) { w_ = w; }

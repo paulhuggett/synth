@@ -24,25 +24,24 @@ inline double midi_note_to_frequency (double tuning, unsigned const note) {
   return tuning * std::pow (2, (note - 69.0) / 12.0);
 }
 
-template <unsigned SampleRate, typename Traits>
+template <unsigned SampleRate, typename Traits,
+          typename Wavetable = wavetable<Traits>>
 class voice {
-  using oscillator_type = oscillator<SampleRate, Traits>;
+  using oscillator_type = oscillator<SampleRate, Traits, Wavetable>;
 
 public:
-  explicit voice (wavetable<Traits> const* const NONNULL w)
-      : osc_{{oscillator_type{w}, oscillator_type{w}}} {}
-
   void note_on (unsigned const note);
   void note_off ();
 
   bool active () const { return env_.active (); }
-  void set_wavetable (wavetable<Traits> const* const NONNULL w);
+  void set_wavetable (Wavetable const* const NONNULL w);
   void set_envelope (typename envelope<SampleRate>::phase stage, double value);
 
   amplitude tick ();
 
 private:
-  std::array<oscillator_type, 2> osc_;
+  static constexpr auto oscillators = size_t{2};
+  std::array<oscillator_type, oscillators> osc_;
   envelope<SampleRate> env_;
 
   static inline double saturate (double const a) {
@@ -52,27 +51,31 @@ private:
 
 // note on
 // ~~~~~~~
-template <unsigned SampleRate, typename Traits>
-void voice<SampleRate, Traits>::note_on (unsigned const note) {
+template <unsigned SampleRate, typename Traits, typename Wavetable>
+void voice<SampleRate, Traits, Wavetable>::note_on (unsigned const note) {
+  constexpr auto master_tune = 440.0;
+  constexpr auto detune = 4.0;
   osc_[0].set_frequency (
-      frequency::fromfp (midi_note_to_frequency (440, note)));  // 8'
-  osc_[1].set_frequency (
-      frequency::fromfp (midi_note_to_frequency (444, note)));
+      frequency::fromfp (midi_note_to_frequency (master_tune, note)));  // 8'
+  if constexpr (oscillators > 0) {
+    osc_[1].set_frequency (frequency::fromfp (
+        midi_note_to_frequency (master_tune + detune, note)));
+  }
   env_.note_on ();
 }
 
 // note off
 // ~~~~~~~~
-template <unsigned SampleRate, typename Traits>
-void voice<SampleRate, Traits>::note_off () {
+template <unsigned SampleRate, typename Traits, typename Wavetable>
+void voice<SampleRate, Traits, Wavetable>::note_off () {
   env_.note_off ();
 }
 
 // set wavetable
 // ~~~~~~~~~~~~~
-template <unsigned SampleRate, typename Traits>
-void voice<SampleRate, Traits>::set_wavetable (
-    wavetable<Traits> const* const NONNULL w) {
+template <unsigned SampleRate, typename Traits, typename Wavetable>
+void voice<SampleRate, Traits, Wavetable>::set_wavetable (
+    Wavetable const* const NONNULL w) {
   for (auto& osc : osc_) {
     osc.set_wavetable (w);
   }
@@ -80,16 +83,16 @@ void voice<SampleRate, Traits>::set_wavetable (
 
 // set envelope
 // ~~~~~~~~~~~~
-template <unsigned SampleRate, typename Traits>
-void voice<SampleRate, Traits>::set_envelope (
+template <unsigned SampleRate, typename Traits, typename Wavetable>
+void voice<SampleRate, Traits, Wavetable>::set_envelope (
     typename envelope<SampleRate>::phase const stage, double const value) {
   env_.set (stage, value);
 }
 
 // tick
 // ~~~~
-template <unsigned SampleRate, typename Traits>
-auto voice<SampleRate, Traits>::tick () -> amplitude {
+template <unsigned SampleRate, typename Traits, typename Wavetable>
+auto voice<SampleRate, Traits, Wavetable>::tick () -> amplitude {
   if (!env_.active ()) {
     return amplitude::fromfp (0.0);
   }

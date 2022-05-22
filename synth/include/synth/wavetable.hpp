@@ -31,7 +31,7 @@ static_assert (mask_v<frequency::integral_bits> >= 20U * 1000U,
 
 // TODO: we're currently storing ±(1+1/2^30) which we don't really need and
 // some of our precious bits.
-using amplitude = fixed<32, 1>;
+using amplitude = fixed<24, 1>;
 
 struct nco_traits {
   /// The number of entries in a wavetable is 2^wavetable_N.
@@ -42,8 +42,9 @@ struct nco_traits {
   static_assert (M >= wavetable_N);
 };
 
-/// A collection of types and constants that are derived from the oscillator and
-/// wavetable traits type.
+/// A collection of types and constants that are derived from the specified
+/// traits type to produce types and constants that are used by both the
+/// oscillator and wavetables.
 template <typename Traits>
 struct oscillator_info {
   static_assert (Traits::M >= frequency::fractional_bits + Traits::wavetable_N);
@@ -123,6 +124,44 @@ wavetable<Traits> const triangle{[] (double const theta) {
 template <typename Traits>
 wavetable<Traits> const sawtooth{
     [] (double const theta) { return theta / pi - 1.0; }};
+
+template <typename Traits>
+class noise_wavetable {
+public:
+  /// The traits type with which this wavetable is associated.
+  using traits = Traits;
+
+  amplitude phase_to_amplitude (
+      typename oscillator_info<Traits>::phase_index_type const /*phase*/)
+      const noexcept {
+    // A simple Linear congruential generator is used to produce random(ish)
+    // values as our noise source.
+    next_ = next_ * 1103515245 + 12345;
+    return amplitude::frombits (next_);
+  }
+
+private:
+  static uint32_t next_;
+};
+
+template <typename Traits>
+uint32_t noise_wavetable<Traits>::next_ = 1;
+
+template <typename Traits>
+noise_wavetable<Traits> const noise;
+
+template <typename Wavetable>
+struct default_wavetable {};
+
+template <typename Traits>
+struct default_wavetable<wavetable<Traits>> {
+  wavetable<Traits> const* operator() () { return &triangle<Traits>; }
+};
+
+template <typename Traits>
+struct default_wavetable<noise_wavetable<Traits>> {
+  noise_wavetable<Traits> const* operator() () { return &noise<Traits>; }
+};
 
 }  // end namespace synth
 
