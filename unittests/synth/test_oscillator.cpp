@@ -38,14 +38,14 @@ public:
 // The exact numbers don't matter but should nonetheless be different to one
 // another. Here I've used the reciprocal of the first 8 primes just because...
 std::vector<amplitude> const results{{
-    amplitude::fromint (0, 0x20000000),  // 1/2=0.5
-    amplitude::fromint (0, 0x15555555),  // 1/3=0.333333
-    amplitude::fromint (0, 0xccccccc),   // 1/5=0.2
-    amplitude::fromint (0, 0x9249249),   // 1/7=0.142857
-    amplitude::fromint (0, 0x5d1745d),   // 1/11=0.0909091
-    amplitude::fromint (0, 0x4ec4ec4),   // 1/13=0.0769231
-    amplitude::fromint (0, 0x3c3c3c3),   // 1/17=0.0588235
-    amplitude::fromint (0, 0x35e50d7),   // 1/19=0.0526316
+    amplitude::fromfp (1.0 / 2.0),
+    amplitude::fromfp (1.0 / 3.0),
+    amplitude::fromfp (1.0 / 5.0),
+    amplitude::fromfp (1.0 / 7.0),
+    amplitude::fromfp (1.0 / 11.0),
+    amplitude::fromfp (1.0 / 13.0),
+    amplitude::fromfp (1.0 / 17.0),
+    amplitude::fromfp (1.0 / 19.0),
 }};
 
 }  // end anonymous namespace
