@@ -6,7 +6,7 @@
 #include <array>
 #include <cmath>
 
-#include "fixed.hpp"
+#include "synth/fixed.hpp"
 
 namespace synth {
 
@@ -155,7 +155,7 @@ struct default_wavetable {};
 
 template <typename Traits>
 struct default_wavetable<wavetable<Traits>> {
-  wavetable<Traits> const* operator() () { return &triangle<Traits>; }
+  wavetable<Traits> const* operator() () { return &sawtooth<Traits>; }
 };
 
 template <typename Traits>

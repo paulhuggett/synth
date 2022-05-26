@@ -1,5 +1,6 @@
 // -*- mode: c++; coding: utf-8-unix; -*-
 // Standard library includes
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <numeric>
@@ -12,6 +13,7 @@
 #include "synth/voice_assigner.hpp"
 
 // Local includes
+#include "poly_blep_sawtooth.hpp"
 #include "wav_file.hpp"
 
 using namespace synth;
@@ -39,37 +41,52 @@ std::array<frequency, 8> const c_major{{
     frequency::fromfp (midi_note_to_frequency (tuning, c4 + 12U)),  // C5
 }};
 
-constexpr auto sample_rate = 48000U;
+constexpr auto sample_rate = 96000U;
 using oscillator_type = oscillator<sample_rate, nco_traits>;
 
+template <typename Oscillator>
 class oscillator_double {
 public:
-  explicit constexpr oscillator_double (oscillator_type *const osc)
-      : osc_{osc} {}
+  oscillator_double (Oscillator *NONNULL const osc) : osc_{osc} {}
+  void set_frequency (frequency const f) { osc_->set_frequency (f); }
   double operator() () { return osc_->tick ().as_double (); }
 
 private:
-  oscillator_type *const osc_;
+  Oscillator *NONNULL osc_;
 };
+oscillator_double ()->oscillator_double<oscillator_type>;
+
+/// Generates an exponential chirp.
+///
+/// \param osc  The oscillator to be used to generate output.
+/// \param minf  The minimum frequency of the chirp (Hz).
+/// \param maxf  The maximum frequency of the chirp (Hz).
+/// \param time  The duration of the chirp.
+/// \param out  A LegacyOutputIterator iterator to which samples will be written.
+/// \returns  Output iterator to the element in the destination range, one past the last element written.
+template <typename Oscillator, typename OutputIterator, typename DurationRep,
+          typename DurationPeriod>
+OutputIterator chirp (Oscillator *NONNULL osc, double minf, double maxf,
+                      std::chrono::duration<DurationRep, DurationPeriod> time,
+                      OutputIterator out) {
+  oscillator_double<Oscillator> oscd{osc};
+
+  auto const time_seconds = std::chrono::duration<double>{time}.count ();
+  auto const samples = static_cast<unsigned long> (
+      std::round (time_seconds * Oscillator::sample_rate));
+  auto const n = (maxf - minf) / (std::pow (2.0, time_seconds) - 1);
+  for (auto t = 0U; t < samples; ++t) {
+    auto const f =
+        n * std::pow (2.0, static_cast<double> (t) / Oscillator::sample_rate) -
+        n + minf;
+    oscd.set_frequency (frequency::fromfp (f));
+    *(out++) = oscd ();
+  }
+  return out;
+}
 
 constexpr auto one_second = sample_rate;
 constexpr auto quarter_second = sample_rate / size_t{4};
-
-// A exponential chirp from 20Hz to 10kHz.
-void chirp (std::vector<double> *const samples) {
-  oscillator_type osc{&sine<nco_traits>};
-  oscillator_double oscd{&osc};
-
-  constexpr auto duration = one_second * 2;
-  constexpr auto growth_rate = 1.0 + .125e-3;
-  constexpr auto maxf = 10e3;  // The max sweep frequency.
-  constexpr auto k = maxf / (duration * growth_rate);
-  for (auto ctr = 0U; ctr < duration; ++ctr) {
-    auto f = k * std::pow (ctr, growth_rate);
-    osc.set_frequency (frequency::fromfp (f));
-    samples->emplace_back (oscd ());
-  }
-}
 
 }  // end anonymous namespace
 
@@ -90,7 +107,7 @@ int main () {
                      oscillator_double{&osc});
   }
 
-  if constexpr ((true)) {
+  if constexpr ((false)) {
     // Play a scale of C major using a collection of voices.
     synth::voice_assigner<sample_rate, nco_traits> voices;
     std::array<unsigned const, 8> const major_scale{
@@ -147,8 +164,11 @@ int main () {
                      oscillator_double{&osc});
   }
 
-  if constexpr (/* DISABLES CODE */ (false)) {
-    chirp (&samples);
+  if constexpr (/* DISABLES CODE */ (true)) {
+    // oscillator_type osc{&sawtooth<nco_traits>};
+    poly_blep_sawtooth_oscillator<sample_rate> osc;
+    chirp (&osc, 0.0, 10000.0, std::chrono::seconds{10},
+           std::back_inserter (samples));
   }
 
   std::vector<uint8_t> wave_file;

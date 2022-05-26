@@ -5,8 +5,8 @@
 #include <array>
 #include <numeric>
 
-#include "envelope.hpp"
-#include "nco.hpp"
+#include "synth/envelope.hpp"
+#include "synth/nco.hpp"
 
 namespace synth {
 

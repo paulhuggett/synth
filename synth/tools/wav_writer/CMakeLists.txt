@@ -1,5 +1,5 @@
 if (NOT SYSTEM_IS_IOS)
-  add_executable (wav_writer main.cpp wav_file.hpp)
+  add_executable (wav_writer main.cpp wav_file.hpp poly_blep_sawtooth.hpp)
   target_link_libraries (wav_writer PRIVATE synth)
   setup_target (wav_writer)
 

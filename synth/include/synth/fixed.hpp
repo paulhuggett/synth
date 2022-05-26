@@ -5,7 +5,7 @@
 #include <cassert>
 #include <ostream>
 
-#include "uint.hpp"
+#include "synth/uint.hpp"
 
 namespace synth {
 

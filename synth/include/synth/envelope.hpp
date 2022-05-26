@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "nco.hpp"
+#include "synth/nco.hpp"
 
 namespace synth {
 

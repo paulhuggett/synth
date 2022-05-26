@@ -8,9 +8,9 @@
 #include <cmath>
 #include <limits>
 
-#include "fixed.hpp"
-#include "uint.hpp"
-#include "wavetable.hpp"
+#include "synth/fixed.hpp"
+#include "synth/uint.hpp"
+#include "synth/wavetable.hpp"
 
 #if !defined(__clang_major__) || __clang_major__ < 7
 #define NONNULL
