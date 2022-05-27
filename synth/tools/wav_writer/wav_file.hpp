@@ -175,6 +175,81 @@ private:
   OutputIterator it_;
 };
 
+template <typename OutputIterator>
+OutputIterator write_header (uint32_t const riff_size, OutputIterator oit) {
+  oit = append4cc ('R', 'I', 'F', 'F', oit);  // Header ckID
+  oit = append<32> (riff_size, oit);          // Header ckSize
+  oit = append4cc ('W', 'A', 'V', 'E', oit);  // Header contents
+  return oit;
+}
+
+// The size of the RIFF chunk is drawn from the size of the following header,
+// format, and data chunks. The latter includes the sample data.
+constexpr auto bit_depth = uint8_t{24};
+static_assert (bit_depth % 8 == 0 && bit_depth <= 32U,
+               "bit depth must be a multiple of 8 and less than 33");
+constexpr uint32_t format_size = sizeof (uint16_t)     // wFormatTag
+                                 + sizeof (uint16_t)   // wChannels
+                                 + sizeof (uint32_t)   // dwSamplesPerSec
+                                 + sizeof (uint32_t)   // dwAvgBytesPerSec
+                                 + sizeof (uint16_t)   // wBlockAlign
+                                 + sizeof (uint16_t);  // wBitsPerSample
+
+template <typename OutputIterator>
+OutputIterator write_format (unsigned const sample_rate, OutputIterator oit) {
+  // WAVE format chunk common fields:
+  // struct {
+  //   uint16_t wFormatTag;       // Format category
+  //   uint16_t wChannels;        // Number of channels
+  //   uint32_t dwSamplesPerSec;  // Sampling rate
+  //   uint32_t dwAvgBytesPerSec; // For buffer estimation
+  //   uint16_t wBlockAlign;      // Data block size
+  // }
+  constexpr auto WAVE_FORMAT_PCM = uint16_t{0x0001};
+  // WAVE format chunk header.
+  oit = append4cc ('f', 'm', 't', ' ', oit);
+  oit = append<32> (format_size, oit);
+  // Now the WAVE format chunk common fields.
+  oit = append<16> (WAVE_FORMAT_PCM, oit);  // wFormatTag (PCM audio format)
+  oit = append<16> (uint16_t{1U}, oit);     // wChannels (Number of channels)
+  oit = append<32> (static_cast<uint32_t> (sample_rate),
+                    oit);  // dwSamplesPerSec (sample rate)
+  oit = append<32> (static_cast<uint32_t> ((sample_rate * bit_depth) / 8U),
+                    oit);  // dwAvgBytesPerSec (bytes per second)
+  oit = append<16> (static_cast<uint16_t> (bit_depth / 8U),
+                    oit);  // wBlockAlign (bytes per block)
+
+  // PCM format specific
+  // struct {
+  //   uint16_t wBitsPerSample; // Sample size
+  // }
+  oit = append<16> (uint16_t{bit_depth}, oit);
+  return oit;
+}
+
+/// \tparam ForwardIterator  A type compatible with the requirements of a
+///   forward iterator and whose value-type is a floating-point type.
+/// \tparam OutputIterator  A type compatible with the requirements of an output
+///   iterator.
+/// \param first Iterator for the first sample.
+/// \param last Iterator for the end of the sample range.
+/// \param data_size  The number of bytes in the chunk payload.
+/// \param dest  The iterator to which data it written.
+/// \return Output iterator one past the last element written.
+template <typename ForwardIterator, typename OutputIterator>
+OutputIterator write_data (ForwardIterator const first,
+                           ForwardIterator const last, uint32_t const data_size,
+                           OutputIterator dest) {
+  // Data chunk header.
+  dest = append4cc ('d', 'a', 't', 'a', dest);  // Data ckID
+  dest = append<32> (data_size, dest);          // Data ckSize
+  // Data chunk contents.
+  dest =
+      std::copy (first, last, append_iterator<OutputIterator, bit_depth> (dest))
+          .it ();
+  return dest;
+}
+
 }  // end namespace details
 
 /// \tparam ForwardIterator  A type compatible with the requirements of a
@@ -195,17 +270,6 @@ OutputIterator emit_wave_file (ForwardIterator first_sample,
                                unsigned const sample_rate, OutputIterator oit) {
   using namespace details;
 
-  // The size of the RIFF chunk is drawn from the size of the following header,
-  // format, and data chunks. The latter includes the sample data.
-  constexpr auto bit_depth = uint8_t{24};
-  static_assert (bit_depth % 8 == 0 && bit_depth <= 32U,
-                 "bit depth must be a multiple of 8 and less than 33");
-  constexpr uint32_t format_size = sizeof (uint16_t)     // wFormatTag
-                                   + sizeof (uint16_t)   // wChannels
-                                   + sizeof (uint32_t)   // dwSamplesPerSec
-                                   + sizeof (uint32_t)   // dwAvgBytesPerSec
-                                   + sizeof (uint16_t)   // wBlockAlign
-                                   + sizeof (uint16_t);  // wBitsPerSample
   constexpr uint32_t fourcc_size = 4U;
   constexpr uint32_t chunk =
       fourcc_size + sizeof (uint32_t);  // Size of each chunk's ckID + ckSize
@@ -216,52 +280,9 @@ OutputIterator emit_wave_file (ForwardIterator first_sample,
                              + format_size  // Format chunk contents
                              + chunk        // Data chunk header
                              + data_size;   // Data chunk contents
-  // Header chunk
-  {
-    oit = append4cc ('R', 'I', 'F', 'F', oit);  // Header ckID
-    oit = append<32> (riff_size, oit);          // Header ckSize
-    oit = append4cc ('W', 'A', 'V', 'E', oit);  // Header contents
-  }
-  // Format chunk
-  {
-    // WAVE format chunk common fields:
-    // struct {
-    //   uint16_t wFormatTag;       // Format category
-    //   uint16_t wChannels;        // Number of channels
-    //   uint32_t dwSamplesPerSec;  // Sampling rate
-    //   uint32_t dwAvgBytesPerSec; // For buffer estimation
-    //   uint16_t wBlockAlign;      // Data block size
-    // }
-    constexpr auto WAVE_FORMAT_PCM = uint16_t{0x0001};
-    // WAVE format chunk header.
-    oit = append4cc ('f', 'm', 't', ' ', oit);
-    oit = append<32> (format_size, oit);
-    // Now the WAVE format chunk common fields.
-    oit = append<16> (WAVE_FORMAT_PCM, oit);  // wFormatTag (PCM audio format)
-    oit = append<16> (uint16_t{1U}, oit);     // wChannels (Number of channels)
-    oit = append<32> (static_cast<uint32_t> (sample_rate),
-                      oit);  // dwSamplesPerSec (sample rate)
-    oit = append<32> (static_cast<uint32_t> ((sample_rate * bit_depth) / 8U),
-                      oit);  // dwAvgBytesPerSec (bytes per second)
-    oit = append<16> (static_cast<uint16_t> (bit_depth / 8U),
-                      oit);  // wBlockAlign (bytes per block)
-
-    // PCM format specific
-    // struct {
-    //   uint16_t wBitsPerSample; // Sample size
-    // }
-    oit = append<16> (uint16_t{bit_depth}, oit);
-  }
-  // Data chunk
-  {
-    // Data chunk header.
-    oit = append4cc ('d', 'a', 't', 'a', oit);  // Data ckID
-    oit = append<32> (data_size, oit);          // Data ckSize
-    // Data chunk contents.
-    oit = std::copy (first_sample, last_sample,
-                     details::append_iterator<OutputIterator, bit_depth> (oit))
-              .it ();
-  }
+  oit = write_header (riff_size, oit);
+  oit = write_format (sample_rate, oit);
+  oit = write_data (first_sample, last_sample, data_size, oit);
   return oit;
 }
 
