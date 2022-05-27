@@ -47,7 +47,8 @@ using oscillator_type = oscillator<sample_rate, nco_traits>;
 template <typename Oscillator>
 class oscillator_double {
 public:
-  oscillator_double (Oscillator *NONNULL const osc) : osc_{osc} {}
+  explicit constexpr oscillator_double (Oscillator *NONNULL const osc)
+      : osc_{osc} {}
   void set_frequency (frequency const f) { osc_->set_frequency (f); }
   double operator() () { return osc_->tick ().as_double (); }
 
@@ -107,7 +108,7 @@ int main () {
                      oscillator_double{&osc});
   }
 
-  if constexpr ((false)) {
+  if constexpr (/* DISABLES CODE */ (false)) {
     // Play a scale of C major using a collection of voices.
     synth::voice_assigner<sample_rate, nco_traits> voices;
     std::array<unsigned const, 8> const major_scale{
