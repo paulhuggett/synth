@@ -81,7 +81,7 @@ template <unsigned SampleRate, typename Traits>
 void voice_assigner<SampleRate, Traits>::set_wavetable (
     wavetable<Traits> const *const w) {
   for (auto &v : voices_) {
-    //    v.v.set_wavetable (w);
+    v.v.set_wavetable (w);
   }
 }
 
