@@ -175,12 +175,18 @@ private:
   OutputIterator it_;
 };
 
+/// \tparam OutputIterator  A type compatible with the requirements of an output
+///   iterator.
+/// \param riff_size  The size of the output file in bytes.
+/// \param dest  The beginning of the destination range.
+/// \returns  Output iterator to the element in the destination range, one past
+///   the last element written.
 template <typename OutputIterator>
-OutputIterator write_header (uint32_t const riff_size, OutputIterator oit) {
-  oit = append4cc ('R', 'I', 'F', 'F', oit);  // Header ckID
-  oit = append<32> (riff_size, oit);          // Header ckSize
-  oit = append4cc ('W', 'A', 'V', 'E', oit);  // Header contents
-  return oit;
+OutputIterator write_header (uint32_t const riff_size, OutputIterator dest) {
+  dest = append4cc ('R', 'I', 'F', 'F', dest);  // Header ckID
+  dest = append<32> (riff_size, dest);          // Header ckSize
+  dest = append4cc ('W', 'A', 'V', 'E', dest);  // Header contents
+  return dest;
 }
 
 // The size of the RIFF chunk is drawn from the size of the following header,
@@ -195,8 +201,14 @@ constexpr uint32_t format_size = sizeof (uint16_t)     // wFormatTag
                                  + sizeof (uint16_t)   // wBlockAlign
                                  + sizeof (uint16_t);  // wBitsPerSample
 
+/// \tparam OutputIterator  A type compatible with the requirements of an output
+///   iterator.
+/// \param sample_rate  The sample rate in Hertz.
+/// \param dest  The beginning of the destination range.
+/// \returns  Output iterator to the element in the destination range, one past
+///   the last element written.
 template <typename OutputIterator>
-OutputIterator write_format (unsigned const sample_rate, OutputIterator oit) {
+OutputIterator write_format (unsigned const sample_rate, OutputIterator dest) {
   // WAVE format chunk common fields:
   // struct {
   //   uint16_t wFormatTag;       // Format category
@@ -207,24 +219,24 @@ OutputIterator write_format (unsigned const sample_rate, OutputIterator oit) {
   // }
   constexpr auto WAVE_FORMAT_PCM = uint16_t{0x0001};
   // WAVE format chunk header.
-  oit = append4cc ('f', 'm', 't', ' ', oit);
-  oit = append<32> (format_size, oit);
+  dest = append4cc ('f', 'm', 't', ' ', dest);
+  dest = append<32> (format_size, dest);
   // Now the WAVE format chunk common fields.
-  oit = append<16> (WAVE_FORMAT_PCM, oit);  // wFormatTag (PCM audio format)
-  oit = append<16> (uint16_t{1U}, oit);     // wChannels (Number of channels)
-  oit = append<32> (static_cast<uint32_t> (sample_rate),
-                    oit);  // dwSamplesPerSec (sample rate)
-  oit = append<32> (static_cast<uint32_t> ((sample_rate * bit_depth) / 8U),
-                    oit);  // dwAvgBytesPerSec (bytes per second)
-  oit = append<16> (static_cast<uint16_t> (bit_depth / 8U),
-                    oit);  // wBlockAlign (bytes per block)
+  dest = append<16> (WAVE_FORMAT_PCM, dest);  // wFormatTag (PCM audio format)
+  dest = append<16> (uint16_t{1U}, dest);     // wChannels (Number of channels)
+  dest = append<32> (static_cast<uint32_t> (sample_rate),
+                     dest);  // dwSamplesPerSec (sample rate)
+  dest = append<32> (static_cast<uint32_t> ((sample_rate * bit_depth) / 8U),
+                     dest);  // dwAvgBytesPerSec (bytes per second)
+  dest = append<16> (static_cast<uint16_t> (bit_depth / 8U),
+                     dest);  // wBlockAlign (bytes per block)
 
   // PCM format specific
   // struct {
   //   uint16_t wBitsPerSample; // Sample size
   // }
-  oit = append<16> (uint16_t{bit_depth}, oit);
-  return oit;
+  dest = append<16> (uint16_t{bit_depth}, dest);
+  return dest;
 }
 
 /// \tparam ForwardIterator  A type compatible with the requirements of a
@@ -259,7 +271,7 @@ OutputIterator write_data (ForwardIterator const first,
 /// \param first_sample  Iterator pointing to the first sample.
 /// \param last_sample  Iterator pointing to the end of the range of samples.
 /// \param sample_rate  The sample rate in Hertz.
-/// \param oit  The beginning of the destination range.
+/// \param dest  The beginning of the destination range.
 /// \returns  Output iterator to the element in the destination range, one past
 ///   the last element written.
 template <typename ForwardIterator, typename OutputIterator,
@@ -267,23 +279,24 @@ template <typename ForwardIterator, typename OutputIterator,
               typename std::iterator_traits<ForwardIterator>::value_type>>>
 OutputIterator emit_wave_file (ForwardIterator first_sample,
                                ForwardIterator last_sample,
-                               unsigned const sample_rate, OutputIterator oit) {
+                               unsigned const sample_rate,
+                               OutputIterator dest) {
   using namespace details;
 
   constexpr uint32_t fourcc_size = 4U;
   constexpr uint32_t chunk =
       fourcc_size + sizeof (uint32_t);  // Size of each chunk's ckID + ckSize
   uint32_t const data_size =
-      details::clamped_distance (first_sample, last_sample) * (bit_depth / 8U);
+      clamped_distance (first_sample, last_sample) * (bit_depth / 8U);
   uint32_t const riff_size = fourcc_size    // WAVE signature
                              + chunk        // Format chunk header
                              + format_size  // Format chunk contents
                              + chunk        // Data chunk header
                              + data_size;   // Data chunk contents
-  oit = write_header (riff_size, oit);
-  oit = write_format (sample_rate, oit);
-  oit = write_data (first_sample, last_sample, data_size, oit);
-  return oit;
+  dest = write_header (riff_size, dest);
+  dest = write_format (sample_rate, dest);
+  dest = write_data (first_sample, last_sample, data_size, dest);
+  return dest;
 }
 
 }  // end namespace synth
