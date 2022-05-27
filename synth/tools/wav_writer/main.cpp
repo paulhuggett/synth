@@ -166,7 +166,6 @@ int main () {
   }
 
   if constexpr (/* DISABLES CODE */ (true)) {
-    // oscillator_type osc{&sawtooth<nco_traits>};
     poly_blep_sawtooth_oscillator<sample_rate> osc;
     chirp (&osc, 0.0, 10000.0, std::chrono::seconds{10},
            std::back_inserter (samples));
