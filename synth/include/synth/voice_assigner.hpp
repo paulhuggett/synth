@@ -55,10 +55,10 @@ void voice_assigner<SampleRate, Traits>::note_on (unsigned const note) {
 // ~~~~~~~~
 template <unsigned SampleRate, typename Traits>
 void voice_assigner<SampleRate, Traits>::note_off (unsigned const note) {
-  for (auto &v : voices_) {
-    if (v.note == note) {
-      v.v.note_off ();
-      v.note = unassigned;
+  for (auto &voice : voices_) {
+    if (voice.note == note) {
+      voice.v.note_off ();
+      voice.note = unassigned;
     }
   }
 }
@@ -69,8 +69,8 @@ template <unsigned SampleRate, typename Traits>
 uint16_t voice_assigner<SampleRate, Traits>::active_voices () const {
   auto result = uint16_t{0};
   auto count = 0U;
-  for (vm const &v : voices_) {
-    result |= static_cast<uint16_t> (v.v.active ()) << count++;
+  for (vm const &voice : voices_) {
+    result |= static_cast<uint16_t> (voice.v.active ()) << count++;
   }
   return result;
 }
@@ -80,8 +80,8 @@ uint16_t voice_assigner<SampleRate, Traits>::active_voices () const {
 template <unsigned SampleRate, typename Traits>
 void voice_assigner<SampleRate, Traits>::set_wavetable (
     wavetable<Traits> const *const w) {
-  for (auto &v : voices_) {
-    v.v.set_wavetable (w);
+  for (auto &voice : voices_) {
+    voice.v.set_wavetable (w);
   }
 }
 
@@ -90,8 +90,8 @@ void voice_assigner<SampleRate, Traits>::set_wavetable (
 template <unsigned SampleRate, typename Traits>
 void voice_assigner<SampleRate, Traits>::set_envelope (
     typename envelope<SampleRate>::phase const stage, double const value) {
-  for (auto &v : voices_) {
-    v.v.set_envelope (stage, value);
+  for (auto &voice : voices_) {
+    voice.v.set_envelope (stage, value);
   }
 }
 
@@ -99,9 +99,10 @@ void voice_assigner<SampleRate, Traits>::set_envelope (
 // ~~~~
 template <unsigned SampleRate, typename Traits>
 double voice_assigner<SampleRate, Traits>::tick () {
-  return std::accumulate (
-      std::begin (voices_), std::end (voices_), 0.0,
-      [] (double acc, vm &v) { return acc + v.v.tick ().as_double (); });
+  return std::accumulate (std::begin (voices_), std::end (voices_), 0.0,
+                          [] (double acc, vm &voice) {
+                            return acc + voice.v.tick ().as_double ();
+                          });
 }
 
 }  // end namespace synth
