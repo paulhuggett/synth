@@ -60,21 +60,23 @@ void envelope<SampleRate>::note_off () {
   phase_ = phase::release;
 }
 
+// active
+// ~~~~~~
 template <unsigned SampleRate>
 bool envelope<SampleRate>::active () const {
   return phase_ != phase::idle;
 }
 
+// set
+// ~~~
 template <unsigned SampleRate>
 void envelope<SampleRate>::set (phase p, double v) {
-  if (!std::isfinite (v)) {
-    return;
-  }
-  v = std::max (v, 0.0);
+  assert (std::isfinite (v) && v >= 0.0);
   if (static_cast<std::underlying_type_t<decltype (p)>> (p) &
       timed_phase_mask) {
-    v = v > 0.0 ? 1.0 / (v * SampleRate) : 0.0;
+    v = v < 1.0 / SampleRate ? 0.0 : 1.0 / (v * SampleRate);
   }
+  assert (v <= 1.0);
   switch (p) {
   case phase::idle: break;
   case phase::attack: attack_ = v; break;
@@ -84,6 +86,8 @@ void envelope<SampleRate>::set (phase p, double v) {
   }
 }
 
+// phase name
+// ~~~~~~~~~~
 template <unsigned SampleRate>
 char const* NONNULL envelope<SampleRate>::phase_name (phase const p) noexcept {
   switch (p) {
@@ -96,6 +100,8 @@ char const* NONNULL envelope<SampleRate>::phase_name (phase const p) noexcept {
   return "";
 }
 
+// tick
+// ~~~~
 template <unsigned SampleRate>
 auto envelope<SampleRate>::tick (amplitude const v) -> amplitude {
   auto delta = 0.0;
