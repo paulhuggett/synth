@@ -50,7 +50,7 @@
                                         selector:@selector (updateActiveVoices)
                                         userInfo:nil
                                          repeats:YES]
-       forMode:NSDefaultRunLoopMode];
+       forMode:NSRunLoopCommonModes];
 }
 
 - (void)updateActiveVoices {
