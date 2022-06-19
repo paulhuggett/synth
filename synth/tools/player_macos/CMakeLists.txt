@@ -31,6 +31,8 @@ if (APPLE)
       Assets.xcassets
       MIDIChangeHandler.mm
       MIDIChangeHandler.h
+      ScopeView.m
+      ScopeView.h
       ViewController.h
       ViewController.mm
       player_macos.mm
