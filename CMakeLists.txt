@@ -1,4 +1,4 @@
-project (synth CXX)
+project (synth C CXX)
 cmake_minimum_required (VERSION 3.16)
 
 option (WERROR "Errors as warnings" Off)
