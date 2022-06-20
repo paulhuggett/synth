@@ -4,19 +4,16 @@
 #import <TargetConditionals.h>
 
 #if TARGET_OS_OSX
-
 #import <Cocoa/Cocoa.h>
-@interface ScopeView : NSView
-@end
-
+typedef NSView ViewBase;
 #elif TARGET_OS_IOS
-
 #import <UIKit/UIKit.h>
-@interface ScopeView : UIView
-@end
-
+typedef UIView ViewBase;
 #else
 #error "Unknown target"
 #endif
+
+@interface ScopeView : ViewBase
+@end
 
 #endif  // SCOPE_VIEW_H
