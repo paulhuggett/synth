@@ -1,5 +1,6 @@
 add_executable (test_synth )
 target_sources (test_synth PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/test_fixed.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/test_oscillator.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/test_wavetable.cpp"
 )

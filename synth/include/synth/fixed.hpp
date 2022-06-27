@@ -3,6 +3,7 @@
 #define SYNTH_FIXED_HPP
 
 #include <cassert>
+#include <cmath>
 #include <ostream>
 
 #include "synth/uint.hpp"
@@ -12,17 +13,17 @@ namespace synth {
 // Equivalent to (T{1}<<N)-T{1}, where T is an unsigned integer type, but
 // without the risk of overflow if N is equal to the number of bits in T.
 // Returns 0 if n is 0.
-template <unsigned N>
+template <unsigned Bits>
 struct mask {
-  static constexpr uinteger_t<N> value =
-      mask<N - 1U>::value << 1U | uinteger_t<N>{1};
+  static constexpr uinteger_t<Bits> value =
+      uinteger_t<Bits>{mask<Bits - 1U>::value} << 1U | uinteger_t<Bits>{1};
 };
 template <>
 struct mask<0U> {
   static constexpr uinteger_t<1U> value = 0U;
 };
-template <unsigned N>
-inline constexpr auto mask_v = mask<N>::value;
+template <unsigned Bits>
+inline constexpr auto mask_v = mask<Bits>::value;
 
 template <unsigned TotalBits, unsigned IntegralBits,
           typename = typename std::enable_if_t<TotalBits >= IntegralBits>>

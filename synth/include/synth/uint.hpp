@@ -7,7 +7,7 @@
 
 namespace synth {
 
-/// Yields the smallest unsigned integer type with \p Bits bits.
+/// Yields the smallest unsigned integer type with at least \p Bits bits.
 template <size_t Bits>
 struct uinteger {
   using type = typename uinteger<Bits + 1>::type;
