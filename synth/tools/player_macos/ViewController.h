@@ -25,7 +25,7 @@
 - (IBAction)waveformAction:(UISegmentedControl *)sender;
 - (IBAction)adsrAction:(UISlider *)sender;
 @property (nonatomic, weak) IBOutlet UITextField *frequencyLabel;
-@property (nonatomic, weak) IBOutlet UITextField *voices;
+@property (nonatomic, weak) IBOutlet UISegmentedControl *voices;
 
 @end
 

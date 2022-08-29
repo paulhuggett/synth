@@ -40,12 +40,23 @@ public:
   amplitude tick ();
 
 private:
-  static constexpr auto oscillators = size_t{2};
-  std::array<oscillator_type, oscillators> osc_;
+  static constexpr auto oscillators_ = size_t{2};
+  static constexpr auto hard_clip_ = false;
+  std::array<oscillator_type, oscillators_> osc_;
   envelope<SampleRate> env_;
 
-  static inline double saturate (double const a) {
-    return std::min (std::max (a, -1.0), 1.0);
+  static constexpr double saturate (double const a) {
+    assert (std::isfinite (a));
+    if (a > 1.0) {
+      return 1.0;
+    }
+    if (a < -1.0) {
+      return -1.0;
+    }
+    if constexpr (hard_clip_) {
+      return a;
+    }
+    return a * (2.0 - (a >= 0.0 ? a : -a));
   }
 };
 
@@ -57,7 +68,7 @@ void voice<SampleRate, Traits, Wavetable>::note_on (unsigned const note) {
   constexpr auto detune = 4.0;
   osc_[0].set_frequency (
       frequency::fromfp (midi_note_to_frequency (master_tune, note)));  // 8'
-  if constexpr (oscillators > 0) {
+  if constexpr (oscillators_ > 0) {
     osc_[1].set_frequency (frequency::fromfp (
         midi_note_to_frequency (master_tune + detune, note)));
   }
@@ -89,6 +100,14 @@ void voice<SampleRate, Traits, Wavetable>::set_envelope (
   env_.set (stage, value);
 }
 
+// Saturating unsigned addition.
+template <unsigned Bits>
+constexpr uinteger_t<Bits> sat_addu (uinteger_t<Bits> const a,
+                                     uinteger_t<Bits> const b) {
+  uinteger_t<Bits> const c = a + b;
+  return (c > mask_v<Bits> || c < a) ? mask_v<Bits> : c;
+}
+
 // tick
 // ~~~~
 template <unsigned SampleRate, typename Traits, typename Wavetable>
@@ -96,13 +115,22 @@ auto voice<SampleRate, Traits, Wavetable>::tick () -> amplitude {
   if (!env_.active ()) {
     return amplitude::fromfp (0.0);
   }
+
   // Mix the output from the oscillators.
+#if 1
   double const a =
       std::accumulate (std::begin (osc_), std::end (osc_), 0.0,
                        [] (double const acc, oscillator_type& osc) {
                          return saturate (acc + osc.tick ().as_double ());
                        });
   return env_.tick (amplitude::fromfp (a));
+#else
+  amplitude a;
+  for (auto osc : osc_) {
+    a = sat_add (a, osc.tick ());
+  }
+  return env_.tick (a);
+#endif
 }
 
 }  // end namespace synth

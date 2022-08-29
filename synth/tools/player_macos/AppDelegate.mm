@@ -381,6 +381,8 @@ static void callback (void *__nullable userData, AudioQueueRef queue, AudioQueue
   [lock_ unlock];
 }
 
+// set envelope stage
+// ~~~~~~~~~~~~~~~~~~
 - (void)setEnvelopeStage:(synth::envelope<sample_rate>::phase)stage to:(double)value {
   NSLog (@"Envelope %@ %f", @(synth::envelope<sample_rate>::phase_name (stage)), value);
 

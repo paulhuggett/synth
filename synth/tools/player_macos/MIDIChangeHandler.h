@@ -2,8 +2,15 @@
 #define MIDI_H
 
 #import <AudioToolbox/AudioToolbox.h>
-#import <Cocoa/Cocoa.h>
 #import <TargetConditionals.h>
+
+#if TARGET_OS_OSX
+#import <Cocoa/Cocoa.h>
+#elif TARGET_OS_IOS
+#import <UIKit/UIKit.h>
+#else
+#error "Unknown target"
+#endif
 
 @interface MIDIChangeHandler : NSObject
 

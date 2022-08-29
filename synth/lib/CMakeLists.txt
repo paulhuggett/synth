@@ -12,4 +12,5 @@ add_library (synth STATIC
   "${CMAKE_CURRENT_SOURCE_DIR}/empty.cpp"
 )
 target_include_directories (synth PUBLIC "${SYNTH_INCLUDES}")
+#target_link_libraries (synth PUBLIC saturation)
 setup_target (synth)

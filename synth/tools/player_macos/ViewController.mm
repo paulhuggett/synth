@@ -59,11 +59,21 @@
     return;
   }
   prevActive_ = active;
+#if TARGET_OS_OSX
   NSSegmentedControl *const v = voices;
-  for (NSInteger segment = 0, lastSegment = v.segmentCount; segment < lastSegment; ++segment) {
+  NSInteger const lastSegment = v.segmentCount;
+  for (NSInteger segment = 0; segment < lastSegment; ++segment) {
     NSImage *const image = (active & (1U << segment)) != 0 ? activeImage_ : inactiveImage_;
     [v setImage:image forSegment:segment];
   }
+#elif TARGET_OS_IOS
+  UISegmentedControl *const v = voices;
+  for (NSUInteger segment = 0U, lastSegment = v.numberOfSegments; segment < lastSegment;
+       ++segment) {
+    UIImage *const image = (active & (1U << segment)) != 0 ? activeImage_ : inactiveImage_;
+    [v setImage:image forSegmentAtIndex:segment];
+  }
+#endif
 }
 
 // set represented object
@@ -75,6 +85,35 @@
   // Update the view, if already loaded.
 }
 #endif
+
+#if TARGET_OS_OSX
+typedef NSSlider SliderType;
+#elif TARGET_OS_IOS
+typedef UISlider SliderType;
+#endif
+
+// ADSR action
+// ~~~~~~~~~~~
+// Called when the value of one of the envelope sliders is changed.
+- (IBAction)adsrAction:(SliderType *)sender {
+  if (appd_ == nil) {
+    return;
+  }
+  using phase = synth::envelope<sample_rate>::phase;
+  auto stage = phase::idle;
+  switch (sender.tag) {
+  case 0: stage = phase::attack; break;
+  case 1: stage = phase::decay; break;
+  case 2: stage = phase::sustain; break;
+  case 3: stage = phase::release; break;
+  }
+#if TARGET_OS_OSX
+  double const value = [sender doubleValue];
+#elif TARGET_OS_IOS
+  float const value = [sender value];
+#endif
+  [appd_ setEnvelopeStage:stage to:value];
+}
 
 #if TARGET_OS_OSX
 // waveform action
@@ -100,31 +139,6 @@
   }
 }
 
-// ADSR action
-// ~~~~~~~~~~~
-// Called when the value of one of the envelope sliders is changed.
-- (IBAction)adsrAction:(NSSlider *)sender {
-  if (appd_ != nil) {
-    using phase = synth::envelope<sample_rate>::phase;
-    auto stage = phase::idle;
-    switch (sender.tag) {
-      case 0:
-        stage = phase::attack;
-        break;
-      case 1:
-        stage = phase::decay;
-        break;
-      case 2:
-        stage = phase::sustain;
-        break;
-      case 3:
-        stage = phase::release;
-        break;
-    }
-    [appd_ setEnvelopeStage:stage to:sender.doubleValue];
-  }
-}
-
 #elif TARGET_OS_IOS
 
 // waveform action
@@ -143,9 +157,9 @@
     unit = @"kHz";
     value /= 1000.0F;
   }
-  frequencyLabel.text = [NSString stringWithFormat:@"%.3lf%@", (double)value, unit];
+  frequencyLabel.text = [NSString stringWithFormat:@"%.3lf%@", static_cast<double> (value), unit];
   if (appd_ != nil) {
-    [appd_ setFrequency:(double)sender.value];
+    [appd_ setFrequency:static_cast<double> (sender.value)];
   }
 }
 

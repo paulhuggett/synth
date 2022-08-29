@@ -1,4 +1,6 @@
 if (APPLE)
+  set (BUNDLE_ID "com.paul-bowen-huggett.player")
+
   if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
     add_executable (player_macos MACOSX_BUNDLE)
@@ -6,7 +8,6 @@ if (APPLE)
     set (STORYBOARDS macOS/Base.lproj/Main.storyboard)
     set (IMAGES )
     set (ICONS )
-    set (BUNDLE_ID "com.paul-bowen-huggett.player")
 
     set_target_properties (player_macos PROPERTIES
       MACOSX_BUNDLE_BUNDLE_NAME          player_macos
@@ -67,14 +68,13 @@ if (APPLE)
     )
     set (IMAGES )
     set (ICONS )
-    set (BUNDLE_ID "com.paul-bowen-huggett.player")
 
     set_target_properties (player_ios PROPERTIES
       MACOSX_BUNDLE_BUNDLE_NAME          player_ios
       MACOSX_BUNDLE_BUNDLE_VERSION       "1.0"
       MACOSX_BUNDLE_COPYRIGHT            "Copyright © 2022 Paul Bowen-Huggett"
       MACOSX_BUNDLE_GUI_IDENTIFIER       "${BUNDLE_ID}"
-      MACOSX_BUNDLE_INFO_PLIST           "${CMAKE_CURRENT_SOURCE_DIR}/MacOSXBundleInfo.plist.in"
+#      MACOSX_BUNDLE_INFO_PLIST           "${CMAKE_CURRENT_SOURCE_DIR}/MacOSXBundleInfo.plist.in"
       MACOSX_BUNDLE_INFO_STRING          "info string"
       MACOSX_BUNDLE_LONG_VERSION_STRING  "Version 1.0"
       MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
@@ -92,6 +92,8 @@ if (APPLE)
       MIDIChangeHandler.mm
       MIDIChangeHandler.h
       Assets.xcassets
+      ScopeView.m
+      ScopeView.h
       ViewController.h
       ViewController.mm
       player_macos.mm
@@ -101,13 +103,15 @@ if (APPLE)
       iOS/SceneDelegate.m iOS/SceneDelegate.h
     )
     setup_target (player_ios)
-    find_library (UIKIT_LIBRARY UIKit)
     find_library (AUDIOTOOLBOX_LIBRARY AudioToolbox)
+    find_library (COREGRAPHICS_LIBRARY CoreGraphics)
     find_library (COREMIDI_LIBRARY CoreMIDI)
+    find_library (UIKIT_LIBRARY UIKit)
     target_link_libraries (player_ios PRIVATE
-      ${UIKIT_LIBRARY}
       ${AUDIOTOOLBOX_LIBRARY}
+      ${COREGRAPHICS_LIBRARY}
       ${COREMIDI_LIBRARY}
+      ${UIKIT_LIBRARY}
       synth
     )
     target_compile_options (player_ios PRIVATE

@@ -39,14 +39,15 @@
 }
 
 #if TARGET_OS_OSX
+typedef NSColor ColorType;
 - (void)drawRect:(NSRect)rect {
   CGContextRef context = [[NSGraphicsContext currentContext] CGContext];
-  CGColorRef color = [[NSColor labelColor] CGColor];
 #elif TARGET_OS_IOS
+typedef UIColor ColorType;
 - (void)drawRect:(CGRect)rect {
   CGContextRef context = UIGraphicsGetCurrentContext ();
-  CGColorRef color = [[UIColor labelColor] CGColor];
 #endif
+  CGColorRef color = [[ColorType labelColor] CGColor];
   CGRect const bounds = [self bounds];
   CGFloat const boundsWidth = CGRectGetWidth (bounds);
 
@@ -65,9 +66,9 @@
   CGContextScaleCTM (context, 1.0, yScale);
 
   CGContextSetLineWidth (context, 1.0 / yScale);
-  drawAxis (1.0, [[NSColor systemBlueColor] CGColor]);
-  drawAxis (0.0, [[NSColor systemGreenColor] CGColor]);
-  drawAxis (-1.0, [[NSColor systemRedColor] CGColor]);
+  drawAxis (1.0, [[ColorType systemBlueColor] CGColor]);
+  drawAxis (0.0, [[ColorType systemGreenColor] CGColor]);
+  drawAxis (-1.0, [[ColorType systemRedColor] CGColor]);
 
   CGContextBeginPath (context);
   CGContextSetStrokeColorWithColor (context, color);
