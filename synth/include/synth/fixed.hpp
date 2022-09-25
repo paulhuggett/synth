@@ -123,8 +123,10 @@ public:
   constexpr OtherFixed cast () const;
 
   static constexpr decltype (auto) fromfp (double const x) {
+#ifdef __has_builtin
 #if __has_builtin(__builtin_isfinite)
     assert (__builtin_isfinite (x));
+#endif
 #endif
     assert (x >= 0.0);
     return ufixed{static_cast<value_type> (std::max (0.0, x) * mul_)};
