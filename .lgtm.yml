@@ -1,4 +1,0 @@
-path_classifiers:
-  exclude:
-    - systemc
-    - googletest
