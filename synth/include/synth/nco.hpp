@@ -63,9 +63,10 @@ private:
 
   phase_index_type phase_accumulator () {
     auto const result = phase_;
-    phase_ =
-        phase_index_type{static_cast<typename phase_index_type::value_type> (
-            phase_.get () + increment_.get ())};
+    // TODO: need a "wrapping add" method. Plain operator+ returns a wider type
+    // to correctly handle overflow, but wrapping/modulo overflow is exactly
+    // what we want here!
+    phase_ = (phase_ + increment_).template cast<phase_index_type> ();
     return result;
   }
 
@@ -81,8 +82,9 @@ private:
     static_assert (decltype (f)::fractional_bits +
                        decltype (C)::fractional_bits ==
                    phase_index_type::fractional_bits);
-    return phase_index_type{static_cast<typename phase_index_type::value_type> (
-        f.get () * C.get ())};
+    return phase_index_type::frombits (
+        static_cast<typename phase_index_type::value_type> (f.get () *
+                                                            C.get ()));
   }
 };
 

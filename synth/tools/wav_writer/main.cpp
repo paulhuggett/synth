@@ -146,7 +146,7 @@ int main () {
     for (auto const f : c_major) {
       static constexpr auto detune = frequency::fromfp (4.0);
       osc1.set_frequency (f);
-      osc2.set_frequency (f + detune);
+      osc2.set_frequency ((f + detune).cast<frequency> ());
       std::generate_n (std::back_inserter (samples), quarter_second, [&] {
         return (osc1.tick ().as_double () + osc2.tick ().as_double ()) / 2.0;
       });

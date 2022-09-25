@@ -13,7 +13,7 @@ public:
   static constexpr const auto sample_rate = SampleRate;
 
   void set_frequency (synth::frequency const f) {
-    dt_ = f.as_double () / sample_rate;
+    dt_ = static_cast<double> (f) / sample_rate;
   }
 
   synth::amplitude tick () {

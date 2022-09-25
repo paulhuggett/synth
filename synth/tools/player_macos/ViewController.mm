@@ -63,8 +63,7 @@
   NSSegmentedControl *const v = voices;
   NSInteger const lastSegment = v.segmentCount;
   for (NSInteger segment = 0; segment < lastSegment; ++segment) {
-    NSImage *const image = (active & (1U << segment)) != 0 ? activeImage_ : inactiveImage_;
-    [v setImage:image forSegment:segment];
+    [v setImage:(active & (1U << segment)) != 0 ? activeImage_ : inactiveImage_ forSegment:segment];
   }
 #elif TARGET_OS_IOS
   UISegmentedControl *const v = voices;

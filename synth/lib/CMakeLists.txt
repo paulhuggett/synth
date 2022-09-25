@@ -3,6 +3,7 @@ set (SYNTH_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../include")
 add_library (synth STATIC
   "${SYNTH_INCLUDES}/synth/envelope.hpp"
   "${SYNTH_INCLUDES}/synth/fixed.hpp"
+  "${SYNTH_INCLUDES}/synth/lerp.hpp"
   "${SYNTH_INCLUDES}/synth/nco.hpp"
   "${SYNTH_INCLUDES}/synth/uint.hpp"
   "${SYNTH_INCLUDES}/synth/voice.hpp"
